@@ -3,914 +3,622 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>קורס קריסה: Claude Code</title>
+<title>Claude Code — עם Migo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
-  :root {
-    --bg: #060608;
-    --bg2: #0d0d12;
-    --bg3: #13131a;
-    --border: rgba(255,255,255,0.07);
-    --border-hot: rgba(255, 160, 40, 0.35);
-    --text: #e8e8f0;
-    --muted: #666680;
-    --amber: #ffa028;
-    --amber-dim: #c97a18;
-    --amber-glow: rgba(255, 160, 40, 0.15);
-    --amber-glow-strong: rgba(255, 160, 40, 0.3);
-    --cyan: #38d9f5;
-    --cyan-dim: rgba(56, 217, 245, 0.12);
-    --green: #4ade80;
-    --green-dim: rgba(74, 222, 128, 0.12);
-    --red: #f87171;
-    --card-bg: rgba(255,255,255,0.03);
-    --card-bg-hover: rgba(255,255,255,0.055);
-    --radius: 16px;
-    --radius-sm: 10px;
-  }
+:root {
+  --bg: #07070c;
+  --bg2: #0f0f18;
+  --bg3: #16161f;
+  --border: rgba(255,255,255,0.08);
+  --border-amber: rgba(255,165,40,0.3);
+  --text: #eeeef5;
+  --muted: #5a5a78;
+  --muted2: #8888aa;
+  --amber: #ffaa28;
+  --amber-glow: rgba(255,170,40,0.14);
+  --cyan: #3de0f8;
+  --cyan-glow: rgba(61,224,248,0.12);
+  --green: #4ade80;
+  --green-glow: rgba(74,222,128,0.12);
+  --purple: #a78bfa;
+  --red: #f87171;
+  --card: rgba(255,255,255,0.03);
+  --card-hover: rgba(255,255,255,0.055);
+  --r: 18px;
+  --r-sm: 10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100vh;overflow-x:hidden}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* noise */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");background-size:180px 180px;pointer-events:none;z-index:0;opacity:.7}
 
-  html {
-    scroll-behavior: smooth;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Heebo', sans-serif;
-    font-size: 17px;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-  }
+/* blobs */
+.blob{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0}
+.b1{width:700px;height:700px;background:var(--amber);top:-250px;right:-200px;opacity:.12;animation:d1 20s ease-in-out infinite}
+.b2{width:500px;height:500px;background:var(--cyan);bottom:5%;left:-180px;opacity:.1;animation:d2 25s ease-in-out infinite}
+@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-60px,80px)}}
+@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(50px,-60px)}}
 
-  body {
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* layout */
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px}
+section{padding:96px 0;position:relative;z-index:1}
+.sep{height:1px;background:linear-gradient(to left,transparent,var(--border),transparent);max-width:900px;margin:0 auto;position:relative;z-index:1}
 
-  /* ── NOISE OVERLAY ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    background-size: 200px 200px;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.6;
-  }
+/* section header */
+.sh{display:flex;align-items:center;gap:14px;margin-bottom:56px}
+.sh .num{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);opacity:.7;letter-spacing:.12em;white-space:nowrap}
+.sh h2{font-size:clamp(26px,4vw,38px);font-weight:900;letter-spacing:-.025em}
+.sh .line{flex:1;height:1px;background:linear-gradient(to left,transparent,var(--border))}
 
-  /* ── GLOW BLOBS ── */
-  .blob {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.18;
-  }
-  .blob-1 {
-    width: 600px; height: 600px;
-    background: var(--amber);
-    top: -200px; left: -150px;
-    animation: drift1 18s ease-in-out infinite;
-  }
-  .blob-2 {
-    width: 500px; height: 500px;
-    background: var(--cyan);
-    bottom: 10%; right: -180px;
-    animation: drift2 22s ease-in-out infinite;
-  }
-  @keyframes drift1 {
-    0%,100% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(60px, 80px) scale(1.1); }
-  }
-  @keyframes drift2 {
-    0%,100% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(-40px, -60px) scale(1.08); }
-  }
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 0}
+.for-badge{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:100px;padding:7px 18px;font-size:13px;color:var(--muted2);margin-bottom:28px;background:var(--card);animation:fd .6s ease both}
+.for-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse 2.5s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--amber);opacity:.7;margin-bottom:20px;animation:fd .5s .05s ease both}
+h1.main{font-size:clamp(56px,10vw,108px);font-weight:900;line-height:.95;letter-spacing:-.03em;margin-bottom:24px;animation:fd .6s .1s ease both}
+h1.main .l1{display:block;color:var(--text)}
+h1.main .l2{display:block;background:linear-gradient(135deg,var(--amber) 0%,#ff7043 55%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(17px,2.8vw,22px);font-weight:300;color:var(--muted2);margin-bottom:20px;animation:fd .6s .2s ease both}
+.hero-tagline{display:inline-flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 22px;font-size:15px;animation:fd .6s .3s ease both}
+.hero-tagline .vs{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;margin:0 4px}
+.hero-tagline .speak{color:var(--muted2)}
+.hero-tagline .do{color:var(--green);font-weight:700}
+.hero-meta{margin-top:56px;display:flex;align-items:center;gap:16px;color:var(--muted);font-size:13px;animation:fd .6s .45s ease both}
+.hero-meta .tick{width:36px;height:1px;background:linear-gradient(to left,var(--amber),transparent)}
+@keyframes fd{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ── LAYOUT ── */
-  .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
+/* ── PHILOSOPHY ── */
+.phil-intro{font-size:18px;color:var(--muted2);max-width:640px;margin-bottom:56px;line-height:1.75}
+.phil-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px}
+.phil-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px;position:relative;overflow:hidden;transition:background .2s}
+.phil-card:hover{background:var(--card-hover)}
+.phil-card.old::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:var(--muted);opacity:.3}
+.phil-card.new::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:linear-gradient(to left,var(--amber),var(--cyan))}
+.phil-label{font-size:11px;font-family:'Space Mono',monospace;letter-spacing:.12em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.phil-label .pill{padding:3px 10px;border-radius:100px;font-size:10px}
+.pill-old{background:rgba(255,255,255,.05);color:var(--muted2);border:1px solid var(--border)}
+.pill-new{background:var(--amber-glow);color:var(--amber);border:1px solid var(--border-amber)}
+.phil-name{font-size:22px;font-weight:800;margin-bottom:8px}
+.phil-desc{font-size:14px;color:var(--muted2);line-height:1.65}
+.phil-icon{font-size:36px;margin-bottom:16px}
 
-  section { padding: 90px 0; }
+.loop-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;display:flex;align-items:center;gap:0;overflow:hidden}
+.loop-step{flex:1;text-align:center;padding:0 12px}
+.loop-step .icon{font-size:28px;margin-bottom:8px}
+.loop-step .name{font-size:13px;font-weight:700;color:var(--text)}
+.loop-step .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.loop-arrow{color:var(--muted);font-size:20px;padding:0 4px;opacity:.5}
 
-  /* ── HERO ── */
-  #hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 0;
-    position: relative;
-  }
+/* ── INSTALL ── */
+.install-steps{display:flex;flex-direction:column;gap:20px}
+.istep{display:grid;grid-template-columns:72px 1fr;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
+.istep.done-step{border-color:rgba(74,222,128,.3)}
+.istep-num{background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:24px 0;border-left:1px solid var(--border);flex-shrink:0}
+.istep-num .n{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--amber)}
+.istep-num .icon{font-size:22px}
+.istep-body{padding:24px 28px}
+.istep-title{font-size:18px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.istep-subtitle{font-size:13px;color:var(--muted2);margin-bottom:16px}
+/* mock browser */
+.mock-browser{background:#111118;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.mock-bar{background:#1a1a24;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.mock-dots{display:flex;gap:5px}
+.mock-dots span{width:10px;height:10px;border-radius:50%}
+.mock-url{flex:1;background:rgba(255,255,255,.04);border-radius:6px;padding:4px 12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted2);text-align:right;direction:ltr;margin:0 10px}
+.mock-body{padding:20px 18px}
+/* mock terminal */
+.mock-terminal{background:#0a0a0f;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.mock-term-bar{background:#141420;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.mock-term-bar span{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace}
+.mock-term-body{padding:16px 18px;font-family:'Space Mono',monospace;font-size:13px;line-height:1.8}
+.t-prompt{color:var(--green)}
+.t-cmd{color:var(--text)}
+.t-out{color:var(--muted2)}
+.t-success{color:var(--green)}
+/* big button */
+.dl-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--amber),#ff7043);color:#07070c;font-weight:800;font-size:15px;padding:12px 24px;border-radius:10px;text-decoration:none;transition:transform .15s,opacity .15s;cursor:pointer;border:none;margin-bottom:8px}
+.dl-btn:hover{transform:translateY(-2px);opacity:.92}
+.dl-btn-ghost{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:14px;padding:10px 20px;border-radius:10px;text-decoration:none;transition:background .2s;cursor:pointer}
+.dl-btn-ghost:hover{background:var(--card-hover)}
+.step-note{font-size:12px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+.step-note::before{content:'ℹ';color:var(--cyan);font-size:13px}
+.verify-chip{display:inline-flex;align-items:center;gap:7px;background:var(--green-glow);border:1px solid rgba(74,222,128,.25);border-radius:100px;padding:6px 14px;font-size:12px;color:var(--green);font-family:'Space Mono',monospace;margin-top:8px}
+/* copy button */
+.copy-wrap{position:relative;margin-bottom:16px}
+.copy-line{display:flex;align-items:center;gap:0;background:#0a0a0f;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden}
+.copy-prefix{padding:12px 14px;color:var(--green);font-family:'Space Mono',monospace;font-size:13px;background:#141420;border-left:1px solid rgba(255,255,255,.06)}
+.copy-cmd{flex:1;padding:12px 14px;font-family:'Space Mono',monospace;font-size:13px;color:var(--cyan);letter-spacing:0}
+.copy-btn{padding:8px 16px;background:var(--amber-glow);color:var(--amber);border:none;border-right:1px solid var(--border-amber);cursor:pointer;font-size:12px;font-family:'Heebo',sans-serif;font-weight:600;transition:background .2s;white-space:nowrap}
+.copy-btn:hover{background:rgba(255,170,40,.25)}
+.copy-btn.copied{color:var(--green);background:var(--green-glow)}
 
-  .hero-inner {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 24px;
-    position: relative;
-    z-index: 1;
-  }
+/* ── TIMELINE ── */
+.timeline{display:flex;flex-direction:column;position:relative}
+.timeline::before{content:'';position:absolute;right:35px;top:20px;bottom:20px;width:2px;background:linear-gradient(to bottom,var(--amber),var(--purple),var(--cyan),transparent);opacity:.2}
+.tli{display:grid;grid-template-columns:1fr 74px;gap:0 20px;margin-bottom:10px}
+.tli-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;transition:background .2s,border-color .2s;position:relative;overflow:hidden}
+.tli-card:hover{background:var(--card-hover)}
+.tli-card .accent-line{position:absolute;top:0;right:0;width:3px;height:100%;background:var(--ac,var(--amber))}
+.tli-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--ac,var(--amber));letter-spacing:.1em;margin-bottom:5px;opacity:.85}
+.tli-name{font-size:20px;font-weight:800;letter-spacing:-.015em;margin-bottom:5px}
+.tli-desc{font-size:14px;color:var(--muted2);line-height:1.65}
+.tli-side{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:22px}
+.tli-dot{width:14px;height:14px;border-radius:50%;background:var(--ac,var(--amber));box-shadow:0 0 14px var(--ac,var(--amber));position:relative;z-index:1}
+.tli-min{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:7px;text-align:center;line-height:1.4}
 
-  .instructor-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--amber-glow);
-    border: 1px solid var(--border-hot);
-    border-radius: 100px;
-    padding: 6px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--amber);
-    letter-spacing: 0.03em;
-    margin-bottom: 36px;
-    animation: fadeSlideDown 0.6s ease both;
-  }
-  .instructor-badge::before {
-    content: '';
-    width: 7px; height: 7px;
-    background: var(--amber);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--amber);
-    animation: pulse 2s ease infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-  }
+/* ── PROJECTS ── */
+.proj-intro{font-size:16px;color:var(--muted2);margin-bottom:40px;max-width:600px}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.proj-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:26px;cursor:pointer;transition:background .2s,border-color .25s,transform .2s;position:relative;overflow:hidden;user-select:none}
+.proj-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--pc-glow,var(--amber-glow)) 0%,transparent 70%);opacity:0;transition:opacity .3s}
+.proj-card:hover{background:var(--card-hover);transform:translateY(-4px);border-color:rgba(255,255,255,.14)}
+.proj-card:hover::before{opacity:1}
+.proj-card.selected{border-color:var(--pc,var(--amber));background:rgba(255,170,40,.05)}
+.proj-card.selected::before{opacity:1}
+.proj-card.selected .proj-pick{opacity:1}
+.proj-emoji{font-size:36px;margin-bottom:14px;display:block}
+.proj-name{font-size:17px;font-weight:800;margin-bottom:6px}
+.proj-desc{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:12px}
+.proj-prompt{font-size:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Space Mono',monospace;color:var(--cyan);line-height:1.5}
+.proj-pick{position:absolute;top:14px;left:14px;background:var(--pc,var(--amber));color:#07070c;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;opacity:0;transition:opacity .2s}
+.proj-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--amber-glow);color:var(--amber);border:1px solid var(--border-amber);margin-bottom:12px}
 
-  .hero-title {
-    font-size: clamp(52px, 9vw, 96px);
-    font-weight: 900;
-    line-height: 1.0;
-    letter-spacing: -0.02em;
-    margin-bottom: 8px;
-    animation: fadeSlideDown 0.6s 0.1s ease both;
-  }
+/* ── CONCEPTS ── */
+.concepts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.con-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:background .2s,transform .2s}
+.con-card:hover{background:var(--card-hover);transform:translateY(-3px)}
+.con-cmd{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--amber);background:var(--amber-glow);border:1px solid var(--border-amber);border-radius:7px;padding:3px 12px;display:inline-block;margin-bottom:11px}
+.con-title{font-size:15px;font-weight:700;margin-bottom:5px}
+.con-desc{font-size:13px;color:var(--muted2);line-height:1.6}
 
-  .hero-title .line1 {
-    display: block;
-    color: var(--text);
-  }
-  .hero-title .line2 {
-    display: block;
-    background: linear-gradient(135deg, var(--amber) 0%, #ff6b35 60%, var(--cyan) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+/* reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:.08s}.rd2{transition-delay:.16s}.rd3{transition-delay:.24s}
 
-  .hero-sub {
-    font-size: clamp(20px, 3.5vw, 28px);
-    font-weight: 300;
-    color: var(--muted);
-    margin-top: 20px;
-    margin-bottom: 14px;
-    animation: fadeSlideDown 0.6s 0.2s ease both;
-  }
+/* footer */
+footer{border-top:1px solid var(--border);padding:48px 0;text-align:center;color:var(--muted);font-size:13px;position:relative;z-index:1}
+footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);opacity:.5;letter-spacing:.14em;margin-bottom:8px}
 
-  .hero-tagline {
-    display: inline-block;
-    font-size: clamp(14px, 2vw, 17px);
-    font-weight: 500;
-    color: var(--text);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 20px;
-    margin-top: 8px;
-    animation: fadeSlideDown 0.6s 0.3s ease both;
-  }
-  .hero-tagline .em { color: var(--cyan); }
-
-  .hero-scroll {
-    margin-top: 64px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--muted);
-    font-size: 13px;
-    animation: fadeSlideDown 0.6s 0.5s ease both;
-  }
-  .scroll-line {
-    width: 40px; height: 1px;
-    background: linear-gradient(to left, var(--amber), transparent);
-  }
-
-  @keyframes fadeSlideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── SECTION LABELS ── */
-  .section-label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 48px;
-  }
-  .section-label .num {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: var(--amber);
-    opacity: 0.7;
-    letter-spacing: 0.1em;
-  }
-  .section-label h2 {
-    font-size: clamp(26px, 4vw, 36px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--text);
-  }
-  .section-label .divider {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to left, transparent, var(--border));
-  }
-
-  /* ── CHECKLIST ── */
-  .progress-bar-wrap {
-    background: rgba(255,255,255,0.05);
-    border-radius: 100px;
-    height: 4px;
-    margin-bottom: 12px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(to left, var(--amber), var(--amber-dim));
-    border-radius: 100px;
-    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    width: 0%;
-  }
-  .progress-text {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 28px;
-    font-family: 'Space Mono', monospace;
-  }
-  .progress-text .count { color: var(--amber); font-weight: 700; }
-
-  .checklist { display: flex; flex-direction: column; gap: 10px; }
-
-  .check-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 22px;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s, transform 0.15s;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-  .check-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, var(--amber-glow) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .check-item:hover { background: var(--card-bg-hover); transform: translateX(-2px); }
-  .check-item:hover::before { opacity: 1; }
-  .check-item.done { border-color: rgba(74, 222, 128, 0.25); }
-  .check-item.done::before { background: linear-gradient(135deg, var(--green-dim) 0%, transparent 60%); opacity: 1; }
-
-  .check-box {
-    width: 24px; height: 24px;
-    min-width: 24px;
-    border-radius: 7px;
-    border: 2px solid var(--border);
-    background: transparent;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.25s;
-    margin-top: 2px;
-  }
-  .check-item.done .check-box {
-    background: var(--green);
-    border-color: var(--green);
-  }
-  .check-box svg { opacity: 0; transition: opacity 0.2s; }
-  .check-item.done .check-box svg { opacity: 1; }
-
-  .check-text { flex: 1; }
-  .check-text strong {
-    display: block;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    transition: color 0.2s;
-    line-height: 1.4;
-  }
-  .check-item.done .check-text strong {
-    text-decoration: line-through;
-    color: var(--muted);
-  }
-  .check-text code {
-    display: inline-block;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 2px 8px;
-    margin-top: 6px;
-    color: var(--cyan);
-    white-space: nowrap;
-  }
-
-  /* ── TIMELINE ── */
-  .timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    right: 38px;
-    top: 24px; bottom: 24px;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--amber), var(--cyan), transparent);
-    opacity: 0.25;
-  }
-
-  .tl-item {
-    display: grid;
-    grid-template-columns: 1fr 80px;
-    gap: 0 24px;
-    position: relative;
-    padding-bottom: 6px;
-  }
-
-  .tl-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px 26px;
-    margin-bottom: 12px;
-    transition: background 0.2s, border-color 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .tl-card::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 3px; height: 100%;
-    background: var(--accent, var(--amber));
-    border-radius: 0 var(--radius) var(--radius) 0;
-    opacity: 0.7;
-  }
-  .tl-card:hover {
-    background: var(--card-bg-hover);
-    border-color: rgba(255,255,255,0.12);
-  }
-
-  .tl-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--accent, var(--amber));
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    margin-bottom: 6px;
-    opacity: 0.85;
-  }
-  .tl-name {
-    font-size: 19px;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 4px;
-    letter-spacing: -0.01em;
-  }
-  .tl-desc {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  .tl-time {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 24px;
-    padding-bottom: 12px;
-  }
-  .tl-dot {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: var(--accent, var(--amber));
-    box-shadow: 0 0 16px var(--accent, var(--amber));
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-  }
-  .tl-min {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 8px;
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  /* ── CONCEPTS ── */
-  .concepts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 14px;
-  }
-
-  .concept-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    transition: background 0.2s, border-color 0.2s, transform 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .concept-card::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; left: 0;
-    height: 2px;
-    background: linear-gradient(to left, var(--amber), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .concept-card:hover {
-    background: var(--card-bg-hover);
-    border-color: rgba(255,255,255,0.12);
-    transform: translateY(-3px);
-  }
-  .concept-card:hover::before { opacity: 1; }
-
-  .concept-cmd {
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--amber);
-    background: var(--amber-glow);
-    border: 1px solid var(--border-hot);
-    border-radius: 8px;
-    padding: 4px 12px;
-    display: inline-block;
-    margin-bottom: 12px;
-  }
-  .concept-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .concept-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  /* ── PROJECTS ── */
-  .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 14px;
-  }
-
-  .project-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 26px 24px;
-    transition: background 0.2s, border-color 0.2s, transform 0.2s;
-    cursor: default;
-  }
-  .project-card:hover {
-    background: var(--card-bg-hover);
-    border-color: rgba(255,255,255,0.12);
-    transform: translateY(-3px);
-  }
-  .project-icon {
-    font-size: 28px;
-    margin-bottom: 14px;
-    display: block;
-  }
-  .project-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-    line-height: 1.3;
-  }
-  .project-desc {
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .project-badge {
-    display: inline-block;
-    margin-top: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 100px;
-    background: var(--amber-glow);
-    color: var(--amber);
-    border: 1px solid var(--border-hot);
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 40px 0;
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-    position: relative;
-    z-index: 1;
-  }
-  footer .footer-inner {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-  footer .logo-text {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: var(--amber);
-    opacity: 0.6;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  /* ── DIVIDER ── */
-  .section-divider {
-    height: 1px;
-    background: linear-gradient(to left, transparent, var(--border), transparent);
-    max-width: 860px;
-    margin: 0 auto;
-  }
-
-  /* ── SCROLL REVEAL ── */
-  .reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.65s ease, transform 0.65s ease;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .reveal-delay-1 { transition-delay: 0.1s; }
-  .reveal-delay-2 { transition-delay: 0.2s; }
-  .reveal-delay-3 { transition-delay: 0.3s; }
-
-  /* ── MOBILE ── */
-  @media (max-width: 600px) {
-    section { padding: 60px 0; }
-    .timeline::before { right: 30px; }
-    .tl-item { grid-template-columns: 1fr 60px; gap: 0 12px; }
-    .concepts-grid { grid-template-columns: 1fr; }
-    .projects-grid { grid-template-columns: 1fr; }
-  }
+/* mobile */
+@media(max-width:640px){
+  .phil-grid{grid-template-columns:1fr}
+  .loop-box{flex-direction:column;gap:16px}
+  .loop-arrow{transform:rotate(90deg)}
+  .istep{grid-template-columns:60px 1fr}
+  .timeline::before{right:28px}
+  .tli{grid-template-columns:1fr 58px}
+  .projects-grid{grid-template-columns:1fr}
+  .concepts-grid{grid-template-columns:1fr}
+  h1.main{font-size:clamp(44px,12vw,72px)}
+}
 </style>
 </head>
 <body>
+<div class="blob b1"></div>
+<div class="blob b2"></div>
 
-<div class="blob blob-1"></div>
-<div class="blob blob-2"></div>
-
-<!-- ═══════════════════════════════════════════════ HERO -->
+<!-- ══════════════════════ HERO -->
 <section id="hero">
-  <div class="hero-inner">
-    <div class="instructor-badge">עם Migo</div>
-    <h1 class="hero-title">
-      <span class="line1">קורס קריסה:</span>
-      <span class="line2">Claude Code</span>
-    </h1>
-    <p class="hero-sub">מ-0 לבונה תוך 60 דקות</p>
-    <div class="hero-tagline">
-      <span class="em">ChatGPT מדבר</span> — Claude Code <strong>עושה</strong>
-    </div>
-    <div class="hero-scroll">
-      <div class="scroll-line"></div>
-      גלול למטה לתכנית הקורס
-    </div>
+<div class="wrap">
+  <div class="for-badge"><span class="dot"></span>לשלי, אביגיל ומוזמנים נוספים</div>
+  <div class="hero-tag">CLAUDE CODE CRASH COURSE</div>
+  <h1 class="main">
+    <span class="l1">תבנו משהו.</span>
+    <span class="l2">עכשיו.</span>
+  </h1>
+  <p class="hero-sub">שיעור אחד של 60 דקות — ואתם כבר בונים.</p>
+  <div class="hero-tagline">
+    <span class="speak">ChatGPT <strong>מדבר</strong></span>
+    <span class="vs">VS</span>
+    <span class="do">Claude Code עושה</span>
   </div>
+  <div class="hero-meta">
+    <div class="tick"></div>
+    עם Migo &nbsp;·&nbsp; מצגת + יישום בפועל &nbsp;·&nbsp; כל אחד בונה פרויקט משלו
+  </div>
+</div>
 </section>
 
-<div class="section-divider"></div>
+<div class="sep"></div>
 
-<!-- ═══════════════════════════════════════════════ CHECKLIST -->
-<section id="prepare">
-  <div class="wrapper">
-    <div class="section-label reveal">
-      <span class="num">01 —</span>
-      <h2>מה להכין לפני</h2>
-      <div class="divider"></div>
+<!-- ══════════════════════ PHILOSOPHY -->
+<section id="philosophy">
+<div class="wrap">
+  <div class="sh reveal"><span class="num">01 —</span><h2>הפילוסופיה</h2><div class="line"></div></div>
+  <p class="phil-intro reveal">כדי להבין את Claude Code, צריך להבין מה שונה אותו מכל כלי AI שהשתמשתם בו עד היום.</p>
+
+  <div class="phil-grid">
+    <div class="phil-card old reveal">
+      <div class="phil-label"><span class="pill pill-old">הכרתם</span></div>
+      <div class="phil-icon">💬</div>
+      <div class="phil-name">ChatGPT</div>
+      <div class="phil-desc">כותב <strong>תשובות</strong>. אם אתם רוצים שמשהו יקרה — אתם צריכים לקחת את הטקסט, להבין אותו, ולהכניס אותו לאיפשהו. הוא <em>מייעץ</em>.</div>
     </div>
-
-    <div class="reveal reveal-delay-1">
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressFill"></div>
-      </div>
-      <p class="progress-text"><span class="count" id="progressCount">0</span>/6 מוכן</p>
-    </div>
-
-    <div class="checklist reveal reveal-delay-2" id="checklist">
-
-      <div class="check-item" data-id="0" onclick="toggle(0)">
-        <div class="check-box">
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5L4.5 8.5L11 1" stroke="#060608" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="check-text">
-          <strong>להתקין Node.js מ-nodejs.org (גרסה 18 ומעלה)</strong>
-          <code>nodejs.org → LTS → Download</code>
-        </div>
-      </div>
-
-      <div class="check-item" data-id="1" onclick="toggle(1)">
-        <div class="check-box">
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5L4.5 8.5L11 1" stroke="#060608" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="check-text">
-          <strong>להתקין VS Code מ-code.visualstudio.com</strong>
-          <code>code.visualstudio.com → Download</code>
-        </div>
-      </div>
-
-      <div class="check-item" data-id="2" onclick="toggle(2)">
-        <div class="check-box">
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5L4.5 8.5L11 1" stroke="#060608" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="check-text">
-          <strong>חשבון Claude Pro פעיל ב-claude.ai</strong>
-          <code>claude.ai → Subscribe to Pro</code>
-        </div>
-      </div>
-
-      <div class="check-item" data-id="3" onclick="toggle(3)">
-        <div class="check-box">
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5L4.5 8.5L11 1" stroke="#060608" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="check-text">
-          <strong>להתקין Claude Code — פתח Terminal והדבק:</strong>
-          <code>npm install -g @anthropic-ai/claude-code</code>
-        </div>
-      </div>
-
-      <div class="check-item" data-id="4" onclick="toggle(4)">
-        <div class="check-box">
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5L4.5 8.5L11 1" stroke="#060608" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="check-text">
-          <strong>לבדוק שהכל עובד — הקלד בטרמינל:</strong>
-          <code>claude --version</code>
-        </div>
-      </div>
-
-      <div class="check-item" data-id="5" onclick="toggle(5)">
-        <div class="check-box">
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5L4.5 8.5L11 1" stroke="#060608" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="check-text">
-          <strong>להביא תיקייה עם קבצים מהמחשב לשיעור</strong>
-        </div>
-      </div>
-
+    <div class="phil-card new reveal rd1">
+      <div class="phil-label"><span class="pill pill-new">חדש</span></div>
+      <div class="phil-icon">🤖</div>
+      <div class="phil-name">Claude Code</div>
+      <div class="phil-desc">פותח קבצים, כותב קוד, מריץ פקודות, בודק אם זה עובד — <strong>הכל אוטומטי</strong>. אתם אומרים מה אתם רוצים — הוא עושה. הוא <em>עוזר עם ידיים</em>.</div>
     </div>
   </div>
+
+  <div class="loop-box reveal rd2">
+    <div class="loop-step">
+      <div class="icon">🧠</div>
+      <div class="name">מתכנן</div>
+      <div class="sub">מבין את הבקשה</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <div class="icon">⚡</div>
+      <div class="name">פועל</div>
+      <div class="sub">כותב, עורך, מריץ</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <div class="icon">✅</div>
+      <div class="name">בודק</div>
+      <div class="sub">רואה אם עבד</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <div class="icon">🔄</div>
+      <div class="name">מתקן</div>
+      <div class="sub">אם לא — מנסה שוב</div>
+    </div>
+  </div>
+</div>
 </section>
 
-<div class="section-divider"></div>
+<div class="sep"></div>
 
-<!-- ═══════════════════════════════════════════════ TIMELINE -->
+<!-- ══════════════════════ INSTALL -->
+<section id="install">
+<div class="wrap">
+  <div class="sh reveal"><span class="num">02 —</span><h2>הכנה לפני השיעור</h2><div class="line"></div></div>
+  <p style="color:var(--muted2);margin-bottom:40px;max-width:580px" class="reveal">עשו את זה לפני שמגיעים. כל שלב עם הסבר מה לחכות לראות. אם משהו לא עובד — כתבו ל-Migo.</p>
+
+  <div class="install-steps">
+
+    <!-- STEP 1 -->
+    <div class="istep reveal">
+      <div class="istep-num"><span class="n">01</span><span class="icon">⬇️</span></div>
+      <div class="istep-body">
+        <div class="istep-title">התקינו Node.js</div>
+        <div class="istep-subtitle">תוכנת בסיס שבלעדיה Claude Code לא יכול לרוץ. כמו Java ל-Minecraft.</div>
+        <div class="mock-browser">
+          <div class="mock-bar">
+            <div class="mock-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#4ade80"></span></div>
+            <div class="mock-url">nodejs.org</div>
+          </div>
+          <div class="mock-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+              <div>
+                <div style="font-size:13px;color:var(--muted2);margin-bottom:4px">Node.js</div>
+                <div style="font-size:22px;font-weight:900;margin-bottom:4px">v22.x LTS</div>
+                <div style="font-size:12px;color:var(--green)">✓ Recommended For Most Users</div>
+              </div>
+              <a class="dl-btn" href="https://nodejs.org" target="_blank">⬇ Download Node.js (LTS)</a>
+            </div>
+          </div>
+        </div>
+        <p class="step-note">הורידו את גרסת LTS (הירוקה). הריצו את הקובץ שהורדתם ולחצו "Next" בכל השלבים.</p>
+        <div class="verify-chip">✓ איך לדעת שהצליח: פתחו Terminal והקלידו <span style="margin-right:6px">node -v</span></div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="istep reveal rd1">
+      <div class="istep-num"><span class="n">02</span><span class="icon">💻</span></div>
+      <div class="istep-body">
+        <div class="istep-title">התקינו VS Code</div>
+        <div class="istep-subtitle">עורך הקוד. כאן תראו את הקבצים משתנים בזמן אמת כשClaudé עובד.</div>
+        <div class="mock-browser">
+          <div class="mock-bar">
+            <div class="mock-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#4ade80"></span></div>
+            <div class="mock-url">code.visualstudio.com</div>
+          </div>
+          <div class="mock-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+              <div>
+                <div style="font-size:13px;color:var(--muted2);margin-bottom:4px">Visual Studio Code</div>
+                <div style="font-size:18px;font-weight:800;margin-bottom:4px">Free. Built on open source.</div>
+              </div>
+              <a class="dl-btn" href="https://code.visualstudio.com" target="_blank">⬇ Download VS Code</a>
+            </div>
+          </div>
+        </div>
+        <p class="step-note">Mac: גררו לתיקיית Applications. Windows: לחצו Next בכל השלבים.</p>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="istep reveal rd2">
+      <div class="istep-num"><span class="n">03</span><span class="icon">🔑</span></div>
+      <div class="istep-body">
+        <div class="istep-title">חשבון Claude Pro</div>
+        <div class="istep-subtitle">Claude Code דורש מנוי Pro פעיל. אם יש לכם — מעולה. אם לא — הירשמו.</div>
+        <a class="dl-btn" href="https://claude.ai" target="_blank">→ claude.ai</a>
+        <p class="step-note">לחצו על "Upgrade to Pro". עולה ~$20 לחודש — אפשר לבטל בכל עת.</p>
+        <div class="verify-chip">✓ אם אתם יכולים להיכנס ל-claude.ai — אתם בסדר</div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="istep reveal">
+      <div class="istep-num"><span class="n">04</span><span class="icon">⚡</span></div>
+      <div class="istep-body">
+        <div class="istep-title">התקינו Claude Code</div>
+        <div class="istep-subtitle">פקודה אחת בטרמינל — וזהו. Terminal זה האפליקציה השחורה עם הטקסט.</div>
+        <p style="font-size:13px;color:var(--muted2);margin-bottom:10px">Mac: חפשו "Terminal" ב-Spotlight (⌘+Space). Windows: חפשו "Command Prompt".</p>
+        <div class="copy-wrap">
+          <div class="copy-line">
+            <span class="copy-prefix">$</span>
+            <span class="copy-cmd" id="cmd1">npm install -g @anthropic-ai/claude-code</span>
+            <button class="copy-btn" onclick="copyCmd('cmd1',this)">העתק</button>
+          </div>
+        </div>
+        <div class="mock-terminal">
+          <div class="mock-term-bar"><span>Terminal</span></div>
+          <div class="mock-term-body">
+            <div><span class="t-prompt">~$</span> <span class="t-cmd">npm install -g @anthropic-ai/claude-code</span></div>
+            <div class="t-out">added 247 packages in 18s</div>
+            <div class="t-success">✓ successfully installed</div>
+          </div>
+        </div>
+        <p class="step-note">זה יכול לקחת 30-60 שניות. חכו שיסיים לפני שממשיכים.</p>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="istep reveal rd1">
+      <div class="istep-num"><span class="n">05</span><span class="icon">✅</span></div>
+      <div class="istep-body">
+        <div class="istep-title">בדקו שהכל עובד</div>
+        <div class="istep-subtitle">פקודה קצרה שמאשרת שהתקנה הצליחה.</div>
+        <div class="copy-wrap">
+          <div class="copy-line">
+            <span class="copy-prefix">$</span>
+            <span class="copy-cmd" id="cmd2">claude --version</span>
+            <button class="copy-btn" onclick="copyCmd('cmd2',this)">העתק</button>
+          </div>
+        </div>
+        <div class="mock-terminal">
+          <div class="mock-term-bar"><span>Terminal</span></div>
+          <div class="mock-term-body">
+            <div><span class="t-prompt">~$</span> <span class="t-cmd">claude --version</span></div>
+            <div class="t-success">claude-code 1.x.x</div>
+            <div class="t-out" style="margin-top:8px">← אם אתם רואים מספר גרסה — הכל עובד 🎉</div>
+          </div>
+        </div>
+        <div class="verify-chip">✓ רואים מספר גרסה? — מוכנים לשיעור</div>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="istep reveal rd2">
+      <div class="istep-num"><span class="n">06</span><span class="icon">📁</span></div>
+      <div class="istep-body">
+        <div class="istep-title">הכינו תיקייה</div>
+        <div class="istep-subtitle">תיקייה ריקה על שולחן העבודה. זה יהיה הפרויקט שתבנו בשיעור.</div>
+        <p style="font-size:14px;color:var(--muted2)">Mac: לחצו ימני על שולחן העבודה → New Folder → קראו לה "my-project"<br>Windows: לחצו ימני על Desktop → New → Folder</p>
+        <p class="step-note">לא צריך שיהיו בה קבצים — נתחיל מאפס ביחד.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ══════════════════════ TIMELINE -->
 <section id="timeline">
-  <div class="wrapper">
-    <div class="section-label reveal">
-      <span class="num">02 —</span>
-      <h2>תכנית 60 הדקות</h2>
-      <div class="divider"></div>
+<div class="wrap">
+  <div class="sh reveal"><span class="num">03 —</span><h2>תכנית 60 הדקות</h2><div class="line"></div></div>
+
+  <div class="timeline">
+
+    <div class="tli reveal">
+      <div class="tli-card" style="--ac:#ffaa28">
+        <div class="accent-line"></div>
+        <div class="tli-tag">0 – 10 דקות</div>
+        <div class="tli-name">הפער</div>
+        <div class="tli-desc">השוואה חיה: ChatGPT vs Claude Code. רואים בפועל מה קורה כשאומרים "תכתוב לי אפליקציה" לכל אחד מהם.</div>
+      </div>
+      <div class="tli-side"><div class="tli-dot" style="--ac:#ffaa28;background:#ffaa28;box-shadow:0 0 14px #ffaa28"></div><div class="tli-min">0<br>דק׳</div></div>
     </div>
 
-    <div class="timeline">
-
-      <div class="tl-item reveal">
-        <div class="tl-card" style="--accent: #ffa028;">
-          <div class="tl-tag">0 – 10 דקות</div>
-          <div class="tl-name">הפער</div>
-          <div class="tl-desc">ChatGPT מדבר — Claude Code עושה. נראה בפועל כמה שניות של עבודה אוטומטית שמחליפות שעות של עבודה ידנית.</div>
-        </div>
-        <div class="tl-time">
-          <div class="tl-dot" style="background:#ffa028;box-shadow:0 0 16px #ffa028;"></div>
-          <div class="tl-min">0<br>דק'</div>
-        </div>
+    <div class="tli reveal rd1">
+      <div class="tli-card" style="--ac:#fb923c">
+        <div class="accent-line"></div>
+        <div class="tli-tag">10 – 20 דקות</div>
+        <div class="tli-name">מגע ראשון</div>
+        <div class="tli-desc">כולם מריצים <code style="font-family:Space Mono,monospace;color:var(--cyan);font-size:12px">claude</code> בתיקייה שלהם. מריצים <code style="font-family:Space Mono,monospace;color:var(--cyan);font-size:12px">/init</code> ורואים איך Claude "מכיר" את הפרויקט.</div>
       </div>
-
-      <div class="tl-item reveal reveal-delay-1">
-        <div class="tl-card" style="--accent: #fb923c;">
-          <div class="tl-tag">10 – 20 דקות</div>
-          <div class="tl-name">מגע ראשון</div>
-          <div class="tl-desc">כולם פותחים תיקייה ומריצים <code style="font-family:Space Mono,monospace;font-size:12px;color:var(--cyan);">claude</code>. מריצים <code style="font-family:Space Mono,monospace;font-size:12px;color:var(--cyan);">/init</code> ורואים איך נוצר CLAUDE.md — "מדריך העובד" של הבינה.</div>
-        </div>
-        <div class="tl-time">
-          <div class="tl-dot" style="background:#fb923c;box-shadow:0 0 16px #fb923c;"></div>
-          <div class="tl-min">10<br>דק'</div>
-        </div>
-      </div>
-
-      <div class="tl-item reveal reveal-delay-2">
-        <div class="tl-card" style="--accent: #a78bfa;">
-          <div class="tl-tag">20 – 35 דקות</div>
-          <div class="tl-name">החוקר</div>
-          <div class="tl-desc">שואלים את Claude: "תסביר לי מה יש בתיקייה הזו כאילו אני ילד בן 5." הוא קורא כל קובץ ומסביר — בלי שגענו בכלום.</div>
-        </div>
-        <div class="tl-time">
-          <div class="tl-dot" style="background:#a78bfa;box-shadow:0 0 16px #a78bfa;"></div>
-          <div class="tl-min">20<br>דק'</div>
-        </div>
-      </div>
-
-      <div class="tl-item reveal reveal-delay-1">
-        <div class="tl-card" style="--accent: #f87171;">
-          <div class="tl-tag">35 – 50 דקות</div>
-          <div class="tl-name">המתקן</div>
-          <div class="tl-desc">שוברים משהו קטן בכוונה (משנים צבע, מוחקים שורה). אומרים: "משהו לא עובד, תסדר." Claude מזהה ומתקן — ורואים את הרשאות האישור בפעולה.</div>
-        </div>
-        <div class="tl-time">
-          <div class="tl-dot" style="background:#f87171;box-shadow:0 0 16px #f87171;"></div>
-          <div class="tl-min">35<br>דק'</div>
-        </div>
-      </div>
-
-      <div class="tl-item reveal reveal-delay-2">
-        <div class="tl-card" style="--accent: #4ade80;">
-          <div class="tl-tag">50 – 60 דקות</div>
-          <div class="tl-name">הבונה</div>
-          <div class="tl-desc">אומרים: "הוסף כותרת עם שם הפרויקט." Claude בונה פיצ'ר מאפס — בלי שאנחנו כתבנו שורת קוד אחת.</div>
-        </div>
-        <div class="tl-time">
-          <div class="tl-dot" style="background:#4ade80;box-shadow:0 0 16px #4ade80;"></div>
-          <div class="tl-min">50<br>דק'</div>
-        </div>
-      </div>
-
+      <div class="tli-side"><div class="tli-dot" style="background:#fb923c;box-shadow:0 0 14px #fb923c"></div><div class="tli-min">10<br>דק׳</div></div>
     </div>
+
+    <div class="tli reveal rd2">
+      <div class="tli-card" style="--ac:#a78bfa">
+        <div class="accent-line"></div>
+        <div class="tli-tag">20 – 35 דקות</div>
+        <div class="tli-name">Demo חי</div>
+        <div class="tli-desc">Migo מדגים: בונה דבר מאפס בפני כולם. כל אחד רואה את התהליך — Plan → Act → Verify — בפעולה.</div>
+      </div>
+      <div class="tli-side"><div class="tli-dot" style="background:#a78bfa;box-shadow:0 0 14px #a78bfa"></div><div class="tli-min">20<br>דק׳</div></div>
+    </div>
+
+    <div class="tli reveal rd1">
+      <div class="tli-card" style="--ac:#3de0f8">
+        <div class="accent-line"></div>
+        <div class="tli-tag">35 – 55 דקות</div>
+        <div class="tli-name">הפרויקט שלך</div>
+        <div class="tli-desc">כל אחד בוחר פרויקט מהרשימה ומתחיל לבנות. Migo עובר ועוזר. התוצאה — אפליקציה עובדת.</div>
+      </div>
+      <div class="tli-side"><div class="tli-dot" style="background:#3de0f8;box-shadow:0 0 14px #3de0f8"></div><div class="tli-min">35<br>דק׳</div></div>
+    </div>
+
+    <div class="tli reveal rd2">
+      <div class="tli-card" style="--ac:#4ade80">
+        <div class="accent-line"></div>
+        <div class="tli-tag">55 – 60 דקות</div>
+        <div class="tli-name">מה הלאה?</div>
+        <div class="tli-desc">כל אחד מציג מה בנה. דיון: איפה CC שימושי בחיים שלכם? מה אפשר לבנות הבא?</div>
+      </div>
+      <div class="tli-side"><div class="tli-dot" style="background:#4ade80;box-shadow:0 0 14px #4ade80"></div><div class="tli-min">55<br>דק׳</div></div>
+    </div>
+
   </div>
+</div>
 </section>
 
-<div class="section-divider"></div>
+<div class="sep"></div>
 
-<!-- ═══════════════════════════════════════════════ CONCEPTS -->
-<section id="concepts">
-  <div class="wrapper">
-    <div class="section-label reveal">
-      <span class="num">03 —</span>
-      <h2>מושגים מפתח</h2>
-      <div class="divider"></div>
-    </div>
-
-    <div class="concepts-grid">
-
-      <div class="concept-card reveal">
-        <div class="concept-cmd">/init</div>
-        <div class="concept-title">אתחול הפרויקט</div>
-        <div class="concept-desc">פקודה ראשונה שמריצים בכל תיקייה חדשה. יוצרת את קובץ CLAUDE.md.</div>
-      </div>
-
-      <div class="concept-card reveal reveal-delay-1">
-        <div class="concept-cmd">CLAUDE.md</div>
-        <div class="concept-title">הוראות קבועות לעוזר</div>
-        <div class="concept-desc">קובץ שאומר ל-Claude "מה אתה צריך לדעת על הפרויקט הזה." כמו מדריך לעובד חדש.</div>
-      </div>
-
-      <div class="concept-card reveal reveal-delay-2">
-        <div class="concept-cmd">Esc Esc</div>
-        <div class="concept-title">עצור הכל, חזור אחורה</div>
-        <div class="concept-desc">לחיצה כפולה על Escape עוצרת את Claude ומחזירה את הקבצים למצב הקודם.</div>
-      </div>
-
-      <div class="concept-card reveal reveal-delay-1">
-        <div class="concept-cmd">Permissions</div>
-        <div class="concept-title">Claude שואל לפני שינויים</div>
-        <div class="concept-desc">לפני כל שינוי בקובץ Claude מבקש אישור. אפשר לאשר, לדחות, או לבקש הסבר.</div>
-      </div>
-
-      <div class="concept-card reveal reveal-delay-2">
-        <div class="concept-cmd">/compact</div>
-        <div class="concept-title">לחסוך בשיחות ארוכות</div>
-        <div class="concept-desc">כשהשיחה מתארכת, /compact מקצר אותה בלי לאבד הקשר חשוב — וחוסך כסף.</div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<div class="section-divider"></div>
-
-<!-- ═══════════════════════════════════════════════ PROJECTS -->
+<!-- ══════════════════════ PROJECTS -->
 <section id="projects">
-  <div class="wrapper">
-    <div class="section-label reveal">
-      <span class="num">04 —</span>
-      <h2>פרויקטים לדמו</h2>
-      <div class="divider"></div>
+<div class="wrap">
+  <div class="sh reveal"><span class="num">04 —</span><h2>בחרו פרויקט</h2><div class="line"></div></div>
+  <p class="proj-intro reveal">כל אחד בוחר פרויקט אחד לבנות בשיעור. לחצו כדי לבחור — תוכלו להציג ל-Migo מה בחרתם.</p>
+
+  <div class="projects-grid" id="projGrid">
+
+    <div class="proj-card reveal" data-proj="0" style="--pc:#ffaa28;--pc-glow:rgba(255,170,40,.12)" onclick="selectProj(0)">
+      <div class="proj-pick">✓ בחרתי</div>
+      <span class="proj-emoji">🌐</span>
+      <div class="proj-tag">מומלץ למתחילים</div>
+      <div class="proj-name">אתר ויזיטקרד אישי</div>
+      <div class="proj-desc">דף אינטרנט עם השם שלכם, תמונה, ומה אתם עושים. כמו כרטיס ביקור דיגיטלי.</div>
+      <div class="proj-prompt">"בנה לי אתר אישי עם שמי, תפקידי ודרכי ליצור קשר"</div>
     </div>
 
-    <div class="projects-grid">
-
-      <div class="project-card reveal">
-        <span class="project-icon">📄</span>
-        <div class="project-title">אתר קורות חיים אישי</div>
-        <div class="project-desc">שינוי צבעים, הוספת סעיפים, שינוי פונטים — כולם מבינים מה הפלט.</div>
-        <div class="project-badge">מומלץ לכיתה</div>
-      </div>
-
-      <div class="project-card reveal reveal-delay-1">
-        <span class="project-icon">📊</span>
-        <div class="project-title">קובץ CSV → ניתוח נתונים</div>
-        <div class="project-desc">"תכתוב סקריפט שמוצא את 5 השורות הכי גבוהות לפי מכירות." אפקט וואו מיידי.</div>
-      </div>
-
-      <div class="project-card reveal reveal-delay-2">
-        <span class="project-icon">✅</span>
-        <div class="project-title">רשימת מטלות (To-Do App)</div>
-        <div class="project-desc">כולם מבינים את הלוגיקה. "הוסף תווית עדיפות לכל משימה."</div>
-      </div>
-
+    <div class="proj-card reveal rd1" data-proj="1" style="--pc:#3de0f8;--pc-glow:rgba(61,224,248,.1)" onclick="selectProj(1)">
+      <div class="proj-pick">✓ בחרתי</div>
+      <span class="proj-emoji">📋</span>
+      <div class="proj-name">רשימת קניות חכמה</div>
+      <div class="proj-desc">אפליקציה לניהול רשימות — הוספה, מחיקה, סימון כבוצע. עובדת על הטלפון.</div>
+      <div class="proj-prompt">"צור רשימת קניות עם אפשרות להוסיף פריטים ולסמן כבוצע"</div>
     </div>
+
+    <div class="proj-card reveal rd2" data-proj="2" style="--pc:#a78bfa;--pc-glow:rgba(167,139,250,.1)" onclick="selectProj(2)">
+      <div class="proj-pick">✓ בחרתי</div>
+      <span class="proj-emoji">🍕</span>
+      <div class="proj-name">ספר מתכונים משפחתי</div>
+      <div class="proj-desc">אתר עם המתכונים שאתם אוהבים — כולל תמונות, מצרכים ואופן הכנה.</div>
+      <div class="proj-prompt">"צור ספר מתכונים דיגיטלי עם חיפוש ועיצוב יפה"</div>
+    </div>
+
+    <div class="proj-card reveal" data-proj="3" style="--pc:#4ade80;--pc-glow:rgba(74,222,128,.1)" onclick="selectProj(3)">
+      <div class="proj-pick">✓ בחרתי</div>
+      <span class="proj-emoji">🎂</span>
+      <div class="proj-name">הזמנה לאירוע</div>
+      <div class="proj-desc">דף הזמנה מעוצב לחגיגה, יום הולדת, חתונה — עם פרטים ואפשרות לאישור הגעה.</div>
+      <div class="proj-prompt">"צור דף הזמנה מעוצב ליום הולדת עם טופס אישור הגעה"</div>
+    </div>
+
+    <div class="proj-card reveal rd1" data-proj="4" style="--pc:#f87171;--pc-glow:rgba(248,113,113,.1)" onclick="selectProj(4)">
+      <div class="proj-pick">✓ בחרתי</div>
+      <span class="proj-emoji">🧠</span>
+      <div class="proj-name">חידון אינטרקטיבי</div>
+      <div class="proj-desc">משחק שאלות ותשובות — אתם מגדירים את השאלות והתשובות, CC בונה את המשחק.</div>
+      <div class="proj-prompt">"צור חידון על [נושא] עם 5 שאלות וניקוד בסוף"</div>
+    </div>
+
+    <div class="proj-card reveal rd2" data-proj="5" style="--pc:#fbbf24;--pc-glow:rgba(251,191,36,.1)" onclick="selectProj(5)">
+      <div class="proj-pick">✓ בחרתי</div>
+      <span class="proj-emoji">💰</span>
+      <div class="proj-name">מחשבון פשוט</div>
+      <div class="proj-desc">מחשבון לכל דבר — שכירות, הלוואה, חלוקת הוצאות. אתם מגדירים מה לחשב.</div>
+      <div class="proj-prompt">"בנה מחשבון לחלוקת הוצאות בין חברים עם עיצוב נקי"</div>
+    </div>
+
   </div>
+</div>
 </section>
 
-<!-- ═══════════════════════════════════════════════ FOOTER -->
+<div class="sep"></div>
+
+<!-- ══════════════════════ CONCEPTS -->
+<section id="concepts">
+<div class="wrap">
+  <div class="sh reveal"><span class="num">05 —</span><h2>מושגי בסיס</h2><div class="line"></div></div>
+
+  <div class="concepts-grid">
+    <div class="con-card reveal">
+      <div class="con-cmd">claude</div>
+      <div class="con-title">מפעילים את העוזר</div>
+      <div class="con-desc">מקלידים בטרמינל בתיקייה שלכם. זה מה שמתחיל שיחה עם Claude Code.</div>
+    </div>
+    <div class="con-card reveal rd1">
+      <div class="con-cmd">/init</div>
+      <div class="con-title">מכירים את הפרויקט</div>
+      <div class="con-desc">Claude סורק את התיקייה ויוצר מדריך לעצמו. כמו עובד חדש שקורא את הנהלים.</div>
+    </div>
+    <div class="con-card reveal rd2">
+      <div class="con-cmd">CLAUDE.md</div>
+      <div class="con-title">הזיכרון הקבוע</div>
+      <div class="con-desc">קובץ שכתוב בו "מה לדעת על הפרויקט הזה". Claude קורא אותו בכל שיחה.</div>
+    </div>
+    <div class="con-card reveal rd1">
+      <div class="con-cmd">Esc Esc</div>
+      <div class="con-title">עצור הכל</div>
+      <div class="con-desc">לחיצה כפולה על Escape עוצרת את Claude ומחזירה הכל למצב הקודם. כמו Ctrl+Z סופר.</div>
+    </div>
+    <div class="con-card reveal rd2">
+      <div class="con-cmd">Permissions</div>
+      <div class="con-title">Claude שואל לפני</div>
+      <div class="con-desc">לפני כל שינוי בקובץ Claude מבקש אישור. אתם תמיד בשליטה.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════ FOOTER -->
 <footer>
-  <div class="footer-inner">
-    <div class="logo-text">CLAUDE CODE CRASH COURSE</div>
-    <p>בניית Migo • 2026</p>
+  <div class="wrap">
+    <div class="logo">CLAUDE CODE CRASH COURSE</div>
+    <p>בניית Migo &nbsp;·&nbsp; לשלי, אביגיל ומוזמנים נוספים &nbsp;·&nbsp; 2026</p>
   </div>
 </footer>
 
 <script>
-  // ── CHECKLIST ──
-  const STORAGE_KEY = 'cc_checklist_v1';
-  const total = 6;
-  let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  if (!Array.isArray(state) || state.length !== total) {
-    state = new Array(total).fill(false);
-  }
+// scroll reveal
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})
+},{threshold:.07,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
-  function toggle(id) {
-    state[id] = !state[id];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    render();
-  }
+// copy buttons
+function copyCmd(id,btn){
+  const txt=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓ הועתק';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='העתק';btn.classList.remove('copied')},2000);
+  });
+}
 
-  function render() {
-    const items = document.querySelectorAll('.check-item');
-    let done = 0;
-    items.forEach((el, i) => {
-      if (state[i]) { el.classList.add('done'); done++; }
-      else { el.classList.remove('done'); }
-    });
-    document.getElementById('progressCount').textContent = done;
-    document.getElementById('progressFill').style.width = (done / total * 100) + '%';
-  }
+// project picker
+const PROJ_KEY='cc_proj_v1';
+let selected=parseInt(localStorage.getItem(PROJ_KEY)??'-1');
 
-  render();
-
-  // ── SCROLL REVEAL ──
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        observer.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+function selectProj(id){
+  selected=selected===id?-1:id;
+  localStorage.setItem(PROJ_KEY,selected);
+  renderProj();
+}
+function renderProj(){
+  document.querySelectorAll('.proj-card').forEach((el,i)=>{
+    el.classList.toggle('selected',i===selected);
+  });
+}
+renderProj();
 </script>
-
 </body>
 </html>

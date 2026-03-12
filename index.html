@@ -141,14 +141,14 @@ h1.main .l2{display:block;background:linear-gradient(135deg,var(--amber) 0%,#ff7
 /* ── TIMELINE ── */
 .timeline{display:flex;flex-direction:column;position:relative}
 .timeline::before{content:'';position:absolute;left:35px;top:20px;bottom:20px;width:2px;background:linear-gradient(to bottom,var(--amber),var(--purple),var(--cyan),transparent);opacity:.2}
-.tli{display:grid;grid-template-columns:1fr 74px;gap:0 20px;margin-bottom:10px}
-.tli-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;transition:background .2s,border-color .2s;position:relative;overflow:hidden}
+.tli{display:flex;flex-direction:row;gap:20px;margin-bottom:10px;align-items:flex-start}
+.tli-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;transition:background .2s,border-color .2s;position:relative;overflow:hidden}
 .tli-card:hover{background:var(--card-hover)}
 .tli-card .accent-line{position:absolute;top:0;left:0;width:3px;height:100%;background:var(--ac,var(--amber))}
 .tli-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--ac,var(--amber));letter-spacing:.1em;margin-bottom:5px;opacity:.85}
 .tli-name{font-size:20px;font-weight:800;letter-spacing:-.015em;margin-bottom:5px}
 .tli-desc{font-size:14px;color:var(--muted2);line-height:1.65}
-.tli-side{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:22px}
+.tli-side{width:74px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:22px}
 .tli-dot{width:14px;height:14px;border-radius:50%;background:var(--ac,var(--amber));box-shadow:0 0 14px var(--ac,var(--amber));position:relative;z-index:1}
 .tli-min{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:7px;text-align:center;line-height:1.4}
 
@@ -193,7 +193,7 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
   .loop-arrow{transform:rotate(90deg)}
   .istep{grid-template-columns:60px 1fr}
   .timeline::before{left:28px}
-  .tli{grid-template-columns:1fr 58px}
+  .tli-side{width:58px}
   .projects-grid{grid-template-columns:1fr}
   .concepts-grid{grid-template-columns:1fr}
   h1.main{font-size:clamp(44px,12vw,72px)}
@@ -342,9 +342,34 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
         <div class="istep-title">התקינו Node.js</div>
         <div class="istep-subtitle">תוכנת בסיס שבלעדיה Claude Code לא יכול לרוץ. כמו Java ל-Minecraft.</div>
 
-        <a class="dl-btn" href="https://nodejs.org" target="_blank">⬇ Download Node.js (LTS)</a>
-        <p class="step-note" style="margin-top:12px">Mac: פתחו את הקובץ שהורדתם ולחצו "Continue" בכל השלבים. &nbsp;|&nbsp; Windows: פתחו את ה-.msi ולחצו "Next" בכל השלבים.</p>
-        <div class="verify-chip" style="margin-top:12px">✓ בדיקה: פתחו Terminal / Command Prompt והקלידו <span style="margin-right:6px">node -v</span> — אם רואים מספר, הצליח</div>
+        <!-- Mac -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:12px;font-weight:700;color:var(--muted2);margin-bottom:10px;letter-spacing:.05em">&#63743; MAC — בטרמינל (2 פקודות):</div>
+          <div class="copy-wrap">
+            <div class="copy-line">
+              <span class="copy-prefix">$</span>
+              <span class="copy-cmd" id="nvm-install">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash</span>
+              <button class="copy-btn" onclick="copyCmd('nvm-install',this)">העתק</button>
+            </div>
+          </div>
+          <p class="step-note">סגרו את הטרמינל, פתחו אותו מחדש, ואז:</p>
+          <div class="copy-wrap" style="margin-top:8px">
+            <div class="copy-line">
+              <span class="copy-prefix">$</span>
+              <span class="copy-cmd" id="nvm-node">nvm install --lts</span>
+              <button class="copy-btn" onclick="copyCmd('nvm-node',this)">העתק</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Windows -->
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted2);margin-bottom:10px;letter-spacing:.05em">⊞ WINDOWS — הורידו מהאתר:</div>
+          <a class="dl-btn" href="https://nodejs.org" target="_blank">⬇ Download Node.js (LTS)</a>
+          <p class="step-note" style="margin-top:8px">הורידו את קובץ ה-.msi, פתחו ולחצו "Next" בכל השלבים.</p>
+        </div>
+
+        <div class="verify-chip" style="margin-top:16px">✓ בדיקה: הקלידו <span style="margin-right:6px">node -v</span> — אם רואים מספר, הצליח</div>
       </div>
     </div>
 

@@ -140,11 +140,11 @@ h1.main .l2{display:block;background:linear-gradient(135deg,var(--amber) 0%,#ff7
 
 /* ── TIMELINE ── */
 .timeline{display:flex;flex-direction:column;position:relative}
-.timeline::before{content:'';position:absolute;right:35px;top:20px;bottom:20px;width:2px;background:linear-gradient(to bottom,var(--amber),var(--purple),var(--cyan),transparent);opacity:.2}
-.tli{display:grid;grid-template-columns:1fr 74px;gap:0 20px;margin-bottom:10px}
+.timeline::before{content:'';position:absolute;left:35px;top:20px;bottom:20px;width:2px;background:linear-gradient(to bottom,var(--amber),var(--purple),var(--cyan),transparent);opacity:.2}
+.tli{display:grid;grid-template-columns:74px 1fr;gap:0 20px;margin-bottom:10px}
 .tli-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;transition:background .2s,border-color .2s;position:relative;overflow:hidden}
 .tli-card:hover{background:var(--card-hover)}
-.tli-card .accent-line{position:absolute;top:0;right:0;width:3px;height:100%;background:var(--ac,var(--amber))}
+.tli-card .accent-line{position:absolute;top:0;left:0;width:3px;height:100%;background:var(--ac,var(--amber))}
 .tli-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--ac,var(--amber));letter-spacing:.1em;margin-bottom:5px;opacity:.85}
 .tli-name{font-size:20px;font-weight:800;letter-spacing:-.015em;margin-bottom:5px}
 .tli-desc{font-size:14px;color:var(--muted2);line-height:1.65}
@@ -192,8 +192,8 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
   .loop-box{flex-direction:column;gap:16px}
   .loop-arrow{transform:rotate(90deg)}
   .istep{grid-template-columns:60px 1fr}
-  .timeline::before{right:28px}
-  .tli{grid-template-columns:1fr 58px}
+  .timeline::before{left:28px}
+  .tli{grid-template-columns:58px 1fr}
   .projects-grid{grid-template-columns:1fr}
   .concepts-grid{grid-template-columns:1fr}
   h1.main{font-size:clamp(44px,12vw,72px)}

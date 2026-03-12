@@ -309,39 +309,14 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
             </div>
           </div>
         </div>
-        <p class="step-note">הורידו את גרסת LTS (הירוקה). הריצו את הקובץ שהורדתם ולחצו "Next" בכל השלבים.</p>
-        <div class="verify-chip">✓ איך לדעת שהצליח: פתחו Terminal והקלידו <span style="margin-right:6px">node -v</span></div>
+        <p class="step-note">Mac: הורידו את גרסת LTS (הירוקה), פתחו את הקובץ ולחצו "Continue" בכל השלבים. &nbsp;|&nbsp; Windows: הורידו את קובץ ה-.msi, פתחו ולחצו "Next" בכל השלבים.</p>
+        <div class="verify-chip">✓ איך לדעת שהצליח: פתחו Terminal (Mac) או Command Prompt (Windows) והקלידו <span style="margin-right:6px">node -v</span></div>
       </div>
     </div>
 
     <!-- STEP 2 -->
     <div class="istep reveal rd1">
-      <div class="istep-num"><span class="n">02</span><span class="icon">💻</span></div>
-      <div class="istep-body">
-        <div class="istep-title">התקינו VS Code</div>
-        <div class="istep-subtitle">עורך הקוד. כאן תראו את הקבצים משתנים בזמן אמת כשClaudé עובד.</div>
-        <div class="mock-browser">
-          <div class="mock-bar">
-            <div class="mock-dots"><span style="background:#f87171"></span><span style="background:#fbbf24"></span><span style="background:#4ade80"></span></div>
-            <div class="mock-url">code.visualstudio.com</div>
-          </div>
-          <div class="mock-body">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-              <div>
-                <div style="font-size:13px;color:var(--muted2);margin-bottom:4px">Visual Studio Code</div>
-                <div style="font-size:18px;font-weight:800;margin-bottom:4px">Free. Built on open source.</div>
-              </div>
-              <a class="dl-btn" href="https://code.visualstudio.com" target="_blank">⬇ Download VS Code</a>
-            </div>
-          </div>
-        </div>
-        <p class="step-note">Mac: גררו לתיקיית Applications. Windows: לחצו Next בכל השלבים.</p>
-      </div>
-    </div>
-
-    <!-- STEP 3 -->
-    <div class="istep reveal rd2">
-      <div class="istep-num"><span class="n">03</span><span class="icon">🔑</span></div>
+      <div class="istep-num"><span class="n">02</span><span class="icon">🔑</span></div>
       <div class="istep-body">
         <div class="istep-title">חשבון Claude Pro</div>
         <div class="istep-subtitle">Claude Code דורש מנוי Pro פעיל. אם יש לכם — מעולה. אם לא — הירשמו.</div>
@@ -351,13 +326,13 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
       </div>
     </div>
 
-    <!-- STEP 4 -->
-    <div class="istep reveal">
-      <div class="istep-num"><span class="n">04</span><span class="icon">⚡</span></div>
+    <!-- STEP 3 -->
+    <div class="istep reveal rd2">
+      <div class="istep-num"><span class="n">03</span><span class="icon">⚡</span></div>
       <div class="istep-body">
         <div class="istep-title">התקינו Claude Code</div>
-        <div class="istep-subtitle">פקודה אחת בטרמינל — וזהו. Terminal זה האפליקציה השחורה עם הטקסט.</div>
-        <p style="font-size:13px;color:var(--muted2);margin-bottom:10px">Mac: חפשו "Terminal" ב-Spotlight (⌘+Space). Windows: חפשו "Command Prompt".</p>
+        <div class="istep-subtitle">פקודה אחת בטרמינל — וזהו.</div>
+        <p style="font-size:13px;color:var(--muted2);margin-bottom:10px">איך לפתוח טרמינל: &nbsp;<strong>Mac</strong> — ⌘+Space ← הקלידו "Terminal" ← Enter &nbsp;|&nbsp; <strong>Windows</strong> — לחצו Win+R ← הקלידו "cmd" ← Enter</p>
         <div class="copy-wrap">
           <div class="copy-line">
             <span class="copy-prefix">$</span>
@@ -366,7 +341,7 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
           </div>
         </div>
         <div class="mock-terminal">
-          <div class="mock-term-bar"><span>Terminal</span></div>
+          <div class="mock-term-bar"><span>Terminal / Command Prompt</span></div>
           <div class="mock-term-body">
             <div><span class="t-prompt">~$</span> <span class="t-cmd">npm install -g @anthropic-ai/claude-code</span></div>
             <div class="t-out">added 247 packages in 18s</div>
@@ -377,9 +352,9 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
       </div>
     </div>
 
-    <!-- STEP 5 -->
-    <div class="istep reveal rd1">
-      <div class="istep-num"><span class="n">05</span><span class="icon">✅</span></div>
+    <!-- STEP 4 -->
+    <div class="istep reveal">
+      <div class="istep-num"><span class="n">04</span><span class="icon">✅</span></div>
       <div class="istep-body">
         <div class="istep-title">בדקו שהכל עובד</div>
         <div class="istep-subtitle">פקודה קצרה שמאשרת שהתקנה הצליחה.</div>
@@ -402,9 +377,9 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
       </div>
     </div>
 
-    <!-- STEP 6 -->
-    <div class="istep reveal rd2">
-      <div class="istep-num"><span class="n">06</span><span class="icon">📁</span></div>
+    <!-- STEP 5 -->
+    <div class="istep reveal rd1">
+      <div class="istep-num"><span class="n">05</span><span class="icon">📁</span></div>
       <div class="istep-body">
         <div class="istep-title">הכינו תיקייה</div>
         <div class="istep-subtitle">תיקייה ריקה על שולחן העבודה. זה יהיה הפרויקט שתבנו בשיעור.</div>

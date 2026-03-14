@@ -1,618 +1,516 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code — עם Migo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Claude Code — Crash Course · BSidesTLV</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
 :root {
-  --bg: #07070c;
-  --bg2: #0f0f18;
-  --bg3: #16161f;
-  --border: rgba(255,255,255,0.08);
-  --border-amber: rgba(255,165,40,0.3);
-  --text: #eeeef5;
-  --muted: #5a5a78;
-  --muted2: #8888aa;
-  --amber: #ffaa28;
-  --amber-glow: rgba(255,170,40,0.14);
-  --cyan: #3de0f8;
-  --cyan-glow: rgba(61,224,248,0.12);
-  --green: #4ade80;
-  --green-glow: rgba(74,222,128,0.12);
-  --purple: #a78bfa;
-  --red: #f87171;
-  --card: rgba(255,255,255,0.03);
-  --card-hover: rgba(255,255,255,0.055);
-  --r: 18px;
-  --r-sm: 10px;
+  --bg:       #050509;
+  --bg2:      #0a0a12;
+  --bg3:      #0f0f1c;
+  --card:     #0d0d1a;
+  --purple:   #7c3aed;
+  --purple-l: #a78bfa;
+  --purple-xl:#c4b5fd;
+  --green:    #a3e635;
+  --green-d:  #65a30d;
+  --pink:     #e879f9;
+  --red:      #ef4444;
+  --amber:    #f59e0b;
+  --cyan:     #22d3ee;
+  --text:     #f1f5f9;
+  --text-2:   #cbd5e1;
+  --muted:    #64748b;
+  --muted-l:  #94a3b8;
+  --border:   rgba(124,58,237,0.18);
+  --border-l: rgba(124,58,237,0.09);
+  --r: 4px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
-body{min-height:100vh;overflow-x:hidden}
+::selection{background:rgba(124,58,237,.35);color:var(--purple-xl)}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
-/* noise */
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");background-size:180px 180px;pointer-events:none;z-index:0;opacity:.7}
+/* ─── PROGRESS ─── */
+#progress{position:fixed;top:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--purple),var(--pink));width:0%;z-index:200;transition:width .1s linear}
 
-/* blobs */
-.blob{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0}
-.b1{width:700px;height:700px;background:var(--amber);top:-250px;right:-200px;opacity:.12;animation:d1 20s ease-in-out infinite}
-.b2{width:500px;height:500px;background:var(--cyan);bottom:5%;left:-180px;opacity:.1;animation:d2 25s ease-in-out infinite}
-@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-60px,80px)}}
-@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(50px,-60px)}}
+/* ─── NAV ─── */
+nav{position:fixed;top:0;right:0;left:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:58px;background:rgba(5,5,9,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-l)}
+.nav-logo{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.2em;color:var(--purple-l);text-transform:uppercase}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--purple-xl)}
+@media(max-width:900px){.nav-links{display:none}}
+.nav-badge{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);color:var(--green);padding:.3rem .75rem;border-radius:2px}
 
-/* layout */
-.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px}
-section{padding:96px 0;position:relative;z-index:1}
-.sep{height:1px;background:linear-gradient(to left,transparent,var(--border),transparent);max-width:900px;margin:0 auto;position:relative;z-index:1}
-
-/* section header */
-.sh{display:flex;align-items:center;gap:14px;margin-bottom:56px}
-.sh .num{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);opacity:.7;letter-spacing:.12em;white-space:nowrap}
-.sh h2{font-size:clamp(26px,4vw,38px);font-weight:900;letter-spacing:-.025em}
-.sh .line{flex:1;height:1px;background:linear-gradient(to left,transparent,var(--border))}
-
-/* ── HERO ── */
-#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 0}
-.for-badge{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:100px;padding:7px 18px;font-size:13px;color:var(--muted2);margin-bottom:28px;background:var(--card);animation:fd .6s ease both}
-.for-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse 2.5s ease infinite}
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,60px) scale(1.1)}}
+@keyframes drift2{from{transform:translate(0,0)}to{transform:translate(-40px,-40px) scale(1.08)}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.hero-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--amber);opacity:.7;margin-bottom:20px;animation:fd .5s .05s ease both}
-h1.main{font-size:clamp(56px,10vw,108px);font-weight:900;line-height:.95;letter-spacing:-.03em;margin-bottom:24px;animation:fd .6s .1s ease both}
-h1.main .l1{display:block;color:var(--text)}
-h1.main .l2{display:block;background:linear-gradient(135deg,var(--amber) 0%,#ff7043 55%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:clamp(17px,2.8vw,22px);font-weight:300;color:var(--muted2);margin-bottom:20px;animation:fd .6s .2s ease both}
-.hero-tagline{display:inline-flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 22px;font-size:15px;animation:fd .6s .3s ease both}
-.hero-tagline .vs{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;margin:0 4px}
-.hero-tagline .speak{color:var(--muted2)}
-.hero-tagline .do{color:var(--green);font-weight:700}
-.hero-meta{margin-top:56px;display:flex;align-items:center;gap:16px;color:var(--muted);font-size:13px;animation:fd .6s .45s ease both}
-.hero-meta .tick{width:36px;height:1px;background:linear-gradient(to left,var(--amber),transparent)}
-@keyframes fd{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── PHILOSOPHY ── */
-.phil-intro{font-size:18px;color:var(--muted2);max-width:640px;margin-bottom:56px;line-height:1.75}
-.phil-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px}
-.phil-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px;position:relative;overflow:hidden;transition:background .2s}
-.phil-card:hover{background:var(--card-hover)}
-.phil-card.old::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:var(--muted);opacity:.3}
-.phil-card.new::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;background:linear-gradient(to left,var(--amber),var(--cyan))}
-.phil-label{font-size:11px;font-family:'Space Mono',monospace;letter-spacing:.12em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.phil-label .pill{padding:3px 10px;border-radius:100px;font-size:10px}
-.pill-old{background:rgba(255,255,255,.05);color:var(--muted2);border:1px solid var(--border)}
-.pill-new{background:var(--amber-glow);color:var(--amber);border:1px solid var(--border-amber)}
-.phil-name{font-size:22px;font-weight:800;margin-bottom:8px}
-.phil-desc{font-size:14px;color:var(--muted2);line-height:1.65}
-.phil-icon{font-size:36px;margin-bottom:16px}
+/* ─── REVEAL ─── */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:none}
+.rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}
 
-.loop-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;display:flex;align-items:center;gap:0;overflow:hidden}
-.loop-step{flex:1;text-align:center;padding:0 12px}
-.loop-step .icon{font-size:28px;margin-bottom:8px}
-.loop-step .name{font-size:13px;font-weight:700;color:var(--text)}
-.loop-step .sub{font-size:12px;color:var(--muted);margin-top:3px}
-.loop-arrow{color:var(--muted);font-size:20px;padding:0 4px;opacity:.5}
+/* ─── HERO ─── */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 2.5rem 7rem;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg::before{content:'';position:absolute;width:900px;height:900px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(124,58,237,.2) 0%,transparent 65%);animation:drift 14s ease-in-out infinite alternate}
+.hero-bg::after{content:'';position:absolute;width:600px;height:600px;bottom:0;right:-100px;background:radial-gradient(circle,rgba(163,230,53,.08) 0%,transparent 65%);animation:drift2 18s ease-in-out infinite alternate}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.04) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,black 40%,transparent 100%)}
+.hero-content{position:relative;z-index:1;max-width:1100px}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:1.75rem;opacity:0;animation:fadeUp .8s .2s ease forwards}
+.hero-title{font-size:clamp(3.5rem,9vw,8.5rem);font-weight:700;line-height:.92;letter-spacing:-.04em;margin-bottom:2rem;opacity:0;animation:fadeUp .8s .4s ease forwards}
+.hero-title .l1{display:block;color:var(--text)}
+.hero-title .l2{display:block;background:linear-gradient(135deg,var(--purple-l) 0%,var(--pink) 50%,var(--green) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-family:'Space Mono',monospace;font-size:clamp(.85rem,1.4vw,1rem);color:var(--muted-l);font-style:italic;line-height:1.85;max-width:540px;margin-bottom:3rem;opacity:0;animation:fadeUp .8s .6s ease forwards}
+.hero-meta{display:flex;gap:0;flex-wrap:wrap;opacity:0;animation:fadeUp .8s .8s ease forwards}
+.hero-meta-item{padding:1.1rem 1.75rem;border:1px solid var(--border);border-left:none}
+.hero-meta-item:first-child{border-left:1px solid var(--border)}
+.hero-meta-label{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.hero-meta-value{font-size:.95rem;font-weight:600}
+.hero-scroll{position:absolute;bottom:3rem;left:2.5rem;display:flex;flex-direction:column;align-items:center;gap:.75rem;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.scroll-line{width:1px;height:44px;background:linear-gradient(to bottom,var(--purple),transparent);animation:fadeUp 1s 1.2s ease forwards;opacity:0}
 
-/* ── INSTALL ── */
-.install-steps{display:flex;flex-direction:column;gap:20px}
-.istep{display:grid;grid-template-columns:72px 1fr;gap:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
-.istep.done-step{border-color:rgba(74,222,128,.3)}
-.istep-num{background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:24px 0;border-left:1px solid var(--border);flex-shrink:0}
-.istep-num .n{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--amber)}
-.istep-num .icon{font-size:22px}
-.istep-body{padding:24px 28px}
-.istep-title{font-size:18px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:10px}
-.istep-subtitle{font-size:13px;color:var(--muted2);margin-bottom:16px}
-/* mock browser */
-.mock-browser{background:#111118;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-bottom:16px}
-.mock-bar{background:#1a1a24;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
-.mock-dots{display:flex;gap:5px}
-.mock-dots span{width:10px;height:10px;border-radius:50%}
-.mock-url{flex:1;background:rgba(255,255,255,.04);border-radius:6px;padding:4px 12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted2);text-align:right;direction:ltr;margin:0 10px}
-.mock-body{padding:20px 18px}
-/* mock terminal */
-.mock-terminal{background:#0a0a0f;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-bottom:16px}
-.mock-term-bar{background:#141420;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
-.mock-term-bar span{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace}
-.mock-term-body{padding:16px 18px;font-family:'Space Mono',monospace;font-size:13px;line-height:1.8}
-.t-prompt{color:var(--green)}
-.t-cmd{color:var(--text)}
-.t-out{color:var(--muted2)}
-.t-success{color:var(--green)}
-/* big button */
-.dl-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--amber),#ff7043);color:#07070c;font-weight:800;font-size:15px;padding:12px 24px;border-radius:10px;text-decoration:none;transition:transform .15s,opacity .15s;cursor:pointer;border:none;margin-bottom:8px}
-.dl-btn:hover{transform:translateY(-2px);opacity:.92}
-.dl-btn-ghost{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:14px;padding:10px 20px;border-radius:10px;text-decoration:none;transition:background .2s;cursor:pointer}
-.dl-btn-ghost:hover{background:var(--card-hover)}
-.step-note{font-size:12px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
-.step-note::before{content:'ℹ';color:var(--cyan);font-size:13px}
-.verify-chip{display:inline-flex;align-items:center;gap:7px;background:var(--green-glow);border:1px solid rgba(74,222,128,.25);border-radius:100px;padding:6px 14px;font-size:12px;color:var(--green);font-family:'Space Mono',monospace;margin-top:8px}
-/* copy button */
-.copy-wrap{position:relative;margin-bottom:16px}
-.copy-line{display:flex;align-items:center;gap:0;background:#0a0a0f;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden}
-.copy-prefix{padding:12px 14px;color:var(--green);font-family:'Space Mono',monospace;font-size:13px;background:#141420;border-left:1px solid rgba(255,255,255,.06)}
-.copy-cmd{flex:1;padding:12px 14px;font-family:'Space Mono',monospace;font-size:13px;color:var(--cyan);letter-spacing:0}
-.copy-btn{padding:8px 16px;background:var(--amber-glow);color:var(--amber);border:none;border-right:1px solid var(--border-amber);cursor:pointer;font-size:12px;font-family:'Heebo',sans-serif;font-weight:600;transition:background .2s;white-space:nowrap}
-.copy-btn:hover{background:rgba(255,170,40,.25)}
-.copy-btn.copied{color:var(--green);background:var(--green-glow)}
+/* ─── MANIFESTO ─── */
+.manifesto{padding:5rem 2.5rem;border-top:1px solid var(--border-l);border-bottom:1px solid var(--border-l)}
+.manifesto p{font-size:clamp(1.4rem,3.5vw,2.75rem);font-weight:600;line-height:1.25;letter-spacing:-.02em;max-width:900px}
+.manifesto em{font-style:normal;color:var(--purple-l)}
+.manifesto strong{color:var(--green)}
 
-/* ── TIMELINE ── */
-.timeline{display:flex;flex-direction:column;position:relative}
-.timeline::before{content:'';position:absolute;left:35px;top:20px;bottom:20px;width:2px;background:linear-gradient(to bottom,var(--amber),var(--purple),var(--cyan),transparent);opacity:.2}
-.tli{display:flex;flex-direction:row;gap:20px;margin-bottom:10px;align-items:flex-start}
-.tli-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;transition:background .2s,border-color .2s;position:relative;overflow:hidden}
-.tli-card:hover{background:var(--card-hover)}
-.tli-card .accent-line{position:absolute;top:0;left:0;width:3px;height:100%;background:var(--ac,var(--amber))}
-.tli-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--ac,var(--amber));letter-spacing:.1em;margin-bottom:5px;opacity:.85}
-.tli-name{font-size:20px;font-weight:800;letter-spacing:-.015em;margin-bottom:5px}
-.tli-desc{font-size:14px;color:var(--muted2);line-height:1.65}
-.tli-side{width:74px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:22px}
-.tli-dot{width:14px;height:14px;border-radius:50%;background:var(--ac,var(--amber));box-shadow:0 0 14px var(--ac,var(--amber));position:relative;z-index:1}
-.tli-min{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:7px;text-align:center;line-height:1.4}
+/* ─── SECTION ─── */
+.section{padding:7rem 2.5rem}
+.section-alt{background:var(--bg2)}
+.section-alt2{background:var(--bg3)}
+.section-label{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem}
+.section h2{font-size:clamp(2.2rem,5.5vw,4.5rem);font-weight:700;line-height:1;letter-spacing:-.03em;margin-bottom:2rem}
+.lead{font-size:clamp(1rem,1.8vw,1.2rem);line-height:1.8;color:var(--text-2);max-width:700px;margin-bottom:3rem}
 
-/* ── PROJECTS ── */
-.proj-intro{font-size:16px;color:var(--muted2);margin-bottom:40px;max-width:600px}
-.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-.proj-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:26px;cursor:pointer;transition:background .2s,border-color .25s,transform .2s;position:relative;overflow:hidden;user-select:none}
-.proj-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--pc-glow,var(--amber-glow)) 0%,transparent 70%);opacity:0;transition:opacity .3s}
-.proj-card:hover{background:var(--card-hover);transform:translateY(-4px);border-color:rgba(255,255,255,.14)}
-.proj-card:hover::before{opacity:1}
-.proj-card.selected{border-color:var(--pc,var(--amber));background:rgba(255,170,40,.05)}
-.proj-card.selected::before{opacity:1}
+/* ─── DEMO ─── */
+.demo-badge{display:inline-flex;align-items:center;gap:.6rem;border:1px solid rgba(163,230,53,.35);color:var(--green);font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:.5rem 1.25rem;border-radius:2px;margin-bottom:2.5rem}
+.demo-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.demo-browser{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:0 32px 80px rgba(0,0,0,.6)}
+.demo-bar{background:#0d0d1a;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-l)}
+.demo-dots{display:flex;gap:5px}
+.demo-dots span{width:10px;height:10px;border-radius:50%;display:block}
+.demo-url{flex:1;background:rgba(255,255,255,.04);border-radius:3px;padding:5px 14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);direction:ltr;text-align:left}
+.demo-open{flex-shrink:0;background:rgba(124,58,237,.15);color:var(--purple-l);border:1px solid var(--border);border-radius:2px;padding:5px 14px;font-size:.65rem;font-family:'Space Mono',monospace;text-decoration:none;letter-spacing:.08em;text-transform:uppercase;transition:background .2s}
+.demo-open:hover{background:rgba(124,58,237,.25)}
+.demo-iframe{height:520px;overflow:hidden;background:var(--bg)}
+.demo-iframe iframe{width:100%;height:100%;border:none;pointer-events:none}
+.demo-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border-l);margin-top:1px}
+.demo-stat{padding:1.5rem 2rem;border-right:1px solid var(--border-l)}
+.demo-stat:last-child{border-right:none}
+.demo-stat-label{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.demo-stat-val{font-size:1.25rem;font-weight:700;color:var(--purple-l)}
+
+/* ─── STEPS / RULE LIST ─── */
+.rule-list{margin-top:2.5rem}
+.rule-item{display:grid;grid-template-columns:60px 1fr 1fr;gap:0 3rem;padding:2rem 0;border-bottom:1px solid var(--border-l);align-items:start;transition:background .2s}
+.rule-item:first-child{border-top:1px solid var(--border-l)}
+.rule-item:hover{background:rgba(124,58,237,.03);margin:0 -1rem;padding-right:1rem;padding-left:1rem}
+.rule-num{font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;color:rgba(124,58,237,.25);letter-spacing:-.02em;line-height:1;padding-top:.15rem}
+.rule-title{font-size:1.05rem;font-weight:600;line-height:1.4;color:var(--text);padding-top:.15rem}
+.rule-body{font-size:.9rem;line-height:1.8;color:var(--muted-l)}
+@media(max-width:800px){.rule-item{grid-template-columns:44px 1fr}.rule-body{grid-column:2;margin-top:.5rem}}
+@media(max-width:500px){.rule-item{grid-template-columns:1fr;gap:.4rem}.rule-num{font-size:1.3rem}}
+
+/* ─── COPY LINE ─── */
+.copy-wrap{margin:.75rem 0}
+.copy-line{display:flex;align-items:center;background:#040408;border:1px solid var(--border);overflow:hidden}
+.copy-prefix{padding:11px 14px;color:var(--green);font-family:'Space Mono',monospace;font-size:.8rem;background:rgba(124,58,237,.07);border-left:1px solid var(--border)}
+.copy-cmd{flex:1;padding:11px 14px;font-family:'Space Mono',monospace;font-size:.8rem;color:var(--cyan);direction:ltr;text-align:left}
+.copy-btn{flex-shrink:0;padding:8px 16px;background:rgba(124,58,237,.12);color:var(--purple-l);border:none;border-left:1px solid var(--border);cursor:pointer;font-size:.68rem;font-family:'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;transition:background .2s;white-space:nowrap}
+.copy-btn:hover{background:rgba(124,58,237,.22)}
+.copy-btn.copied{color:var(--green);background:rgba(163,230,53,.1)}
+.step-note{font-size:.82rem;color:var(--muted);margin-top:.5rem;line-height:1.65}
+.step-note code{font-family:'Space Mono',monospace;color:var(--cyan);font-size:.78rem}
+.verify-chip{display:inline-flex;align-items:center;gap:.5rem;border:1px solid rgba(163,230,53,.25);color:var(--green);font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.08em;padding:.45rem 1rem;margin-top:.75rem}
+.warn-box{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);padding:1rem 1.25rem;font-size:.85rem;color:var(--muted-l);line-height:1.7;margin:.75rem 0}
+.warn-box strong{color:var(--red)}
+.ok-box{background:rgba(124,58,237,.06);border:1px solid var(--border);padding:1rem 1.25rem;font-size:.85rem;color:var(--muted-l);line-height:1.7;margin:.75rem 0}
+.ok-box strong{color:var(--purple-l)}
+.platform-label{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-l);margin-bottom:.6rem;margin-top:1.25rem}
+
+/* ─── TIMELINE ─── */
+.timeline-stats{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--border-l);margin-bottom:3.5rem}
+@media(max-width:700px){.timeline-stats{grid-template-columns:repeat(2,1fr)}}
+.tl-stat{padding:1.75rem 1.5rem;border-right:1px solid var(--border-l)}
+.tl-stat:last-child{border-right:none}
+.tl-stat-num{font-size:clamp(1.8rem,3.5vw,3rem);font-weight:700;letter-spacing:-.03em;color:var(--purple-l);display:block;margin-bottom:.35rem}
+.tl-stat-label{font-size:.8rem;color:var(--muted-l)}
+.tl-list{display:flex;flex-direction:column;gap:0}
+.tl-item{display:grid;grid-template-columns:96px 1fr;border-bottom:1px solid var(--border-l);transition:background .2s}
+.tl-item:first-child{border-top:1px solid var(--border-l)}
+.tl-item:hover{background:rgba(124,58,237,.03)}
+.tl-time{padding:2rem 1.5rem;border-left:1px solid var(--border-l);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:.35rem}
+.tl-dot{width:10px;height:10px;border-radius:50%;background:var(--ac,var(--purple-l));box-shadow:0 0 12px var(--ac,var(--purple-l));flex-shrink:0}
+.tl-min{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);text-align:center;line-height:1.5}
+.tl-body{padding:2rem 2rem 2rem 0}
+.tl-tag{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ac,var(--purple-l));margin-bottom:.5rem}
+.tl-name{font-size:1.25rem;font-weight:700;margin-bottom:.5rem}
+.tl-desc{font-size:.9rem;color:var(--muted-l);line-height:1.75}
+
+/* ─── PROJECTS ─── */
+.projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border-l);border:1px solid var(--border-l);margin-top:3rem}
+@media(max-width:800px){.projects-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.projects-grid{grid-template-columns:1fr}}
+.proj-card{background:var(--bg);padding:2rem;transition:background .2s;cursor:pointer;position:relative}
+.proj-card:hover{background:var(--bg3)}
+.proj-card.selected{background:rgba(124,58,237,.08);outline:1px solid var(--purple)}
+.proj-emoji{font-size:2rem;display:block;margin-bottom:1rem}
+.proj-badge{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem}
+.proj-name{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.proj-desc{font-size:.85rem;color:var(--muted-l);line-height:1.65;margin-bottom:.85rem}
+.proj-prompt{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--purple-l);background:rgba(124,58,237,.07);border:1px solid var(--border);padding:.6rem .85rem;line-height:1.5;direction:ltr;text-align:left}
+.proj-pick{position:absolute;top:1rem;left:1rem;background:var(--purple);color:#fff;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:.25rem .6rem;opacity:0;transition:opacity .2s}
 .proj-card.selected .proj-pick{opacity:1}
-.proj-emoji{font-size:36px;margin-bottom:14px;display:block}
-.proj-name{font-size:17px;font-weight:800;margin-bottom:6px}
-.proj-desc{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:12px}
-.proj-prompt{font-size:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Space Mono',monospace;color:var(--cyan);line-height:1.5}
-.proj-pick{position:absolute;top:14px;left:14px;background:var(--pc,var(--amber));color:#07070c;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;opacity:0;transition:opacity .2s}
-.proj-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--amber-glow);color:var(--amber);border:1px solid var(--border-amber);margin-bottom:12px}
 
-/* ── CONCEPTS ── */
-.concepts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.con-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:background .2s,transform .2s}
-.con-card:hover{background:var(--card-hover);transform:translateY(-3px)}
-.con-cmd{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--amber);background:var(--amber-glow);border:1px solid var(--border-amber);border-radius:7px;padding:3px 12px;display:inline-block;margin-bottom:11px}
-.con-title{font-size:15px;font-weight:700;margin-bottom:5px}
-.con-desc{font-size:13px;color:var(--muted2);line-height:1.6}
+/* ─── CONCEPTS ─── */
+.concepts-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border-l);border:1px solid var(--border-l);margin-top:3rem}
+@media(max-width:900px){.concepts-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.concepts-grid{grid-template-columns:1fr}}
+.con-card{background:var(--bg);padding:2rem;transition:background .2s}
+.con-card:hover{background:var(--bg3)}
+.con-cmd{font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700;color:var(--purple-l);background:rgba(124,58,237,.1);border:1px solid var(--border);display:inline-block;padding:.25rem .75rem;margin-bottom:.85rem;letter-spacing:.04em}
+.con-title{font-size:.95rem;font-weight:700;margin-bottom:.4rem}
+.con-desc{font-size:.82rem;color:var(--muted-l);line-height:1.7}
 
-/* reveal */
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
-.reveal.visible{opacity:1;transform:translateY(0)}
-.rd1{transition-delay:.08s}.rd2{transition-delay:.16s}.rd3{transition-delay:.24s}
+/* ─── MARQUEE ─── */
+.marquee-wrap{overflow:hidden;border-top:1px solid var(--border-l);border-bottom:1px solid var(--border-l);padding:1.1rem 0}
+.marquee-track{display:flex;white-space:nowrap;animation:marquee 30s linear infinite}
+.marquee-item{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--muted);padding:0 2.5rem;letter-spacing:.06em;border-right:1px solid var(--border-l);flex-shrink:0}
+.marquee-item span{color:var(--purple-l);margin-left:.5rem}
 
-/* footer */
-footer{border-top:1px solid var(--border);padding:48px 0;text-align:center;color:var(--muted);font-size:13px;position:relative;z-index:1}
-footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);opacity:.5;letter-spacing:.14em;margin-bottom:8px}
+/* ─── FOOTER ─── */
+footer{padding:4rem 2.5rem;border-top:1px solid var(--border-l);display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:2rem}
+.footer-logo{font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.12em;color:var(--muted-l);margin-bottom:.4rem}
+.footer-tagline{font-size:1rem;color:var(--purple-l);font-style:italic}
+.footer-right{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--muted);line-height:1.8;text-align:left}
 
-/* mobile */
-@media(max-width:640px){
-  .phil-grid{grid-template-columns:1fr}
-  .loop-box{flex-direction:column;gap:16px}
-  .loop-arrow{transform:rotate(90deg)}
-  .istep{grid-template-columns:60px 1fr}
-  .timeline::before{left:28px}
-  .tli-side{width:58px}
-  .projects-grid{grid-template-columns:1fr}
-  .concepts-grid{grid-template-columns:1fr}
-  h1.main{font-size:clamp(44px,12vw,72px)}
-}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--purple)}
 </style>
 </head>
 <body>
-<div class="blob b1"></div>
-<div class="blob b2"></div>
+
+<div id="progress"></div>
+
+<nav>
+  <div class="nav-logo">BSidesTLV · Claude Code</div>
+  <ul class="nav-links">
+    <li><a href="#demo">דמו</a></li>
+    <li><a href="#install">הכנה</a></li>
+    <li><a href="#timeline">תכנית</a></li>
+    <li><a href="#projects">פרויקטים</a></li>
+    <li><a href="#concepts">מושגים</a></li>
+  </ul>
+  <div class="nav-badge">Crash Course</div>
+</nav>
 
 <!-- ══════════════════════ HERO -->
-<section id="hero">
-<div class="wrap">
-  <div class="for-badge"><span class="dot"></span>לשלי, אביגיל ומוזמנים נוספים</div>
-  <div class="hero-tag">CLAUDE CODE CRASH COURSE</div>
-  <h1 class="main">
-    <span class="l1">תבנו משהו.</span>
-    <span class="l2">עכשיו.</span>
-  </h1>
-  <p class="hero-sub">שיעור אחד של 60 דקות — ואתם כבר בונים.</p>
-  <div class="hero-tagline">
-    <span class="speak">ChatGPT <strong>מדבר</strong></span>
-    <span class="vs">VS</span>
-    <span class="do">Claude Code עושה</span>
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
   </div>
-  <div class="hero-meta">
-    <div class="tick"></div>
-    עם Migo &nbsp;·&nbsp; מצגת + יישום בפועל &nbsp;·&nbsp; כל אחד בונה פרויקט משלו
+  <div class="hero-content">
+    <div class="hero-eyebrow">BSidesTLV 2026 · Claude Code Crash Course</div>
+    <h1 class="hero-title">
+      <span class="l1">תבנו משהו.</span>
+      <span class="l2">עכשיו.</span>
+    </h1>
+    <p class="hero-sub">שיעור אחד של 60 דקות — ואתם כבר בונים.<br/>ChatGPT מדבר. Claude Code עושה.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">משך</div>
+        <div class="hero-meta-value">60 דקות</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">רמה</div>
+        <div class="hero-meta-value">אפס ניסיון</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">תוצאה</div>
+        <div class="hero-meta-value">אפליקציה עובדת</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">מנחה</div>
+        <div class="hero-meta-value">Migo Kedem</div>
+      </div>
+    </div>
   </div>
-</div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    גללו
+  </div>
 </section>
 
-<div class="sep"></div>
-
-<!-- ══════════════════════ PHILOSOPHY -->
-<section id="philosophy">
-<div class="wrap">
-  <div class="sh reveal"><span class="num">01 —</span><h2>הפילוסופיה</h2><div class="line"></div></div>
-  <p class="phil-intro reveal">כדי להבין את Claude Code, צריך להבין מה שונה אותו מכל כלי AI שהשתמשתם בו עד היום.</p>
-
-  <div class="phil-grid">
-    <div class="phil-card old reveal">
-      <div class="phil-label"><span class="pill pill-old">הכרתם</span></div>
-      <div class="phil-icon">💬</div>
-      <div class="phil-name">ChatGPT</div>
-      <div class="phil-desc">כותב <strong>תשובות</strong>. אם אתם רוצים שמשהו יקרה — אתם צריכים לקחת את הטקסט, להבין אותו, ולהכניס אותו לאיפשהו. הוא <em>מייעץ</em>.</div>
-    </div>
-    <div class="phil-card new reveal rd1">
-      <div class="phil-label"><span class="pill pill-new">חדש</span></div>
-      <div class="phil-icon">🤖</div>
-      <div class="phil-name">Claude Code</div>
-      <div class="phil-desc">פותח קבצים, כותב קוד, מריץ פקודות, בודק אם זה עובד — <strong>הכל אוטומטי</strong>. אתם אומרים מה אתם רוצים — הוא עושה. הוא <em>עוזר עם ידיים</em>.</div>
-    </div>
-  </div>
-
-  <div class="loop-box reveal rd2">
-    <div class="loop-step">
-      <div class="icon">🧠</div>
-      <div class="name">מתכנן</div>
-      <div class="sub">מבין את הבקשה</div>
-    </div>
-    <div class="loop-arrow">→</div>
-    <div class="loop-step">
-      <div class="icon">⚡</div>
-      <div class="name">פועל</div>
-      <div class="sub">כותב, עורך, מריץ</div>
-    </div>
-    <div class="loop-arrow">→</div>
-    <div class="loop-step">
-      <div class="icon">✅</div>
-      <div class="name">בודק</div>
-      <div class="sub">רואה אם עבד</div>
-    </div>
-    <div class="loop-arrow">→</div>
-    <div class="loop-step">
-      <div class="icon">🔄</div>
-      <div class="name">מתקן</div>
-      <div class="sub">אם לא — מנסה שוב</div>
-    </div>
-  </div>
+<!-- ══════════════════════ MANIFESTO -->
+<div class="manifesto reveal">
+  <p>כלי ה-AI שהכרתם <em>מייעצים</em>. Claude Code <strong>עושה</strong> — פותח קבצים, כותב קוד, מריץ פקודות, מתקן שגיאות. אתם אומרים מה רוצים. הוא מביא את זה לעולם.</p>
 </div>
-</section>
-
-<div class="sep"></div>
 
 <!-- ══════════════════════ DEMO -->
-<section id="demo">
-<div class="wrap">
-  <div class="sh reveal"><span class="num">02 —</span><h2>מה בנינו ב-45 דקות</h2><div class="line"></div></div>
-  <p style="font-size:18px;color:var(--muted2);max-width:620px;margin-bottom:16px;line-height:1.75" class="reveal">זה לא קוד שכתבתי. זה מה שיצא מהטרמינל אחרי 45 דקות של שיחה עם Claude Code — אפס ניסיון גרפי, אפס עיצוב ידני.</p>
-  <div class="reveal" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,170,40,.1);border:1px solid rgba(255,170,40,.35);border-radius:100px;padding:8px 20px;font-size:14px;font-weight:700;color:var(--amber);margin-bottom:36px;">
-    ⏱ 45 דקות · Claude Code · מאפס
-  </div>
+<section class="section" id="demo">
+  <div class="section-label reveal">02 — דמו חי</div>
+  <h2 class="reveal">45 דקות של עבודה.</h2>
+  <p class="lead reveal">זה לא קוד שכתבתי. זה מה שיצא מהטרמינל אחרי שיחה עם Claude Code — אפס ניסיון גרפי, אפס עיצוב ידני.</p>
+  <div class="demo-badge reveal">45 דקות · Claude Code · מאפס</div>
 
-  <div class="reveal" style="border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:0 24px 80px rgba(0,0,0,.5)">
-    <!-- browser chrome -->
-    <div style="background:#1a1a24;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06)">
-      <div style="display:flex;gap:6px">
-        <span style="width:11px;height:11px;border-radius:50%;background:#f87171;display:block"></span>
-        <span style="width:11px;height:11px;border-radius:50%;background:#fbbf24;display:block"></span>
-        <span style="width:11px;height:11px;border-radius:50%;background:#4ade80;display:block"></span>
+  <div class="demo-browser reveal">
+    <div class="demo-bar">
+      <div class="demo-dots">
+        <span style="background:#f87171"></span>
+        <span style="background:#fbbf24"></span>
+        <span style="background:#4ade80"></span>
       </div>
-      <div style="flex:1;background:rgba(255,255,255,.05);border-radius:6px;padding:5px 14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted2);direction:ltr;text-align:left">migo811.github.io/bsidestlv-brandbook</div>
-      <a href="https://migo811.github.io/bsidestlv-brandbook/" target="_blank" style="flex-shrink:0;background:var(--amber-glow);color:var(--amber);border:1px solid var(--border-amber);border-radius:7px;padding:5px 14px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">פתחו ↗</a>
+      <div class="demo-url">migo811.github.io/bsidestlv-brandbook</div>
+      <a class="demo-open" href="https://migo811.github.io/bsidestlv-brandbook/" target="_blank">פתחו ↗</a>
     </div>
-    <!-- iframe preview -->
-    <div style="position:relative;height:520px;overflow:hidden;background:#07070c">
-      <iframe src="https://migo811.github.io/bsidestlv-brandbook/" style="width:100%;height:100%;border:none;pointer-events:none" loading="lazy" title="BSidesTLV Brand Book"></iframe>
+    <div class="demo-iframe">
+      <iframe src="https://migo811.github.io/bsidestlv-brandbook/" loading="lazy" title="BSidesTLV Brand Book"></iframe>
     </div>
-  </div>
-
-  <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px">
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px">
-      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);margin-bottom:6px">שפות</div>
-      <div style="font-size:15px;font-weight:700">HTML · CSS · JS</div>
-      <div style="font-size:12px;color:var(--muted2);margin-top:3px">קובץ אחד. לא נגעתי בו.</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px">
-      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--cyan);margin-bottom:6px">זמן</div>
-      <div style="font-size:15px;font-weight:700">45 דקות</div>
-      <div style="font-size:12px;color:var(--muted2);margin-top:3px">כולל שיחה, תיקונים, deploy</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px">
-      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--green);margin-bottom:6px">ניסיון נדרש</div>
-      <div style="font-size:15px;font-weight:700">אפס</div>
-      <div style="font-size:12px;color:var(--muted2);margin-top:3px">רק לדעת מה רוצים</div>
+    <div class="demo-stats">
+      <div class="demo-stat">
+        <div class="demo-stat-label">שפות</div>
+        <div class="demo-stat-val">HTML · CSS · JS</div>
+      </div>
+      <div class="demo-stat">
+        <div class="demo-stat-label">זמן</div>
+        <div class="demo-stat-val">45 דקות</div>
+      </div>
+      <div class="demo-stat">
+        <div class="demo-stat-label">ניסיון נדרש</div>
+        <div class="demo-stat-val">אפס</div>
+      </div>
     </div>
   </div>
-</div>
 </section>
 
-<div class="sep"></div>
+<!-- ══════════════════════ MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">claude<span>—</span>CLAUDE.md<span>—</span>/init<span>—</span>Memory<span>—</span>Skills<span>—</span>Analysis<span>—</span>Esc Esc<span>—</span>Permissions<span>—</span>claude<span>—</span>CLAUDE.md<span>—</span>/init<span>—</span>Memory<span>—</span>Skills<span>—</span>Analysis<span>—</span>Esc Esc<span>—</span>Permissions</div>
+    <div class="marquee-item">claude<span>—</span>CLAUDE.md<span>—</span>/init<span>—</span>Memory<span>—</span>Skills<span>—</span>Analysis<span>—</span>Esc Esc<span>—</span>Permissions<span>—</span>claude<span>—</span>CLAUDE.md<span>—</span>/init<span>—</span>Memory<span>—</span>Skills<span>—</span>Analysis<span>—</span>Esc Esc<span>—</span>Permissions</div>
+  </div>
+</div>
 
 <!-- ══════════════════════ INSTALL -->
-<section id="install">
-<div class="wrap">
-  <div class="sh reveal"><span class="num">03 —</span><h2>הכנה לפני השיעור</h2><div class="line"></div></div>
-  <p style="color:var(--muted2);margin-bottom:40px;max-width:580px" class="reveal">עשו את זה לפני שמגיעים. כל שלב עם הסבר מה לחכות לראות. אם משהו לא עובד — כתבו ל-Migo.</p>
+<section class="section section-alt" id="install">
+  <div class="section-label reveal">03 — הכנה לפני השיעור</div>
+  <h2 class="reveal">5 שלבים.</h2>
+  <p class="lead reveal">עשו את זה לפני שמגיעים. כל שלב עם הסבר מה לחכות לראות. אם משהו לא עובד — כתבו ל-Migo.</p>
 
-  <div class="install-steps">
+  <div class="rule-list">
 
-    <!-- STEP 1 -->
-    <div class="istep reveal">
-      <div class="istep-num"><span class="n">01</span><span class="icon">⬇️</span></div>
-      <div class="istep-body">
-        <div class="istep-title">התקינו Node.js</div>
-        <div class="istep-subtitle">תוכנת בסיס שבלעדיה Claude Code לא יכול לרוץ. כמו Java ל-Minecraft.</div>
-
-        <!-- Mac -->
-        <div style="margin-bottom:20px">
-          <div style="font-size:12px;font-weight:700;color:var(--muted2);margin-bottom:10px;letter-spacing:.05em">&#63743; MAC — בטרמינל (2 פקודות):</div>
-          <div class="copy-wrap">
-            <div class="copy-line">
-              <span class="copy-prefix">$</span>
-              <span class="copy-cmd" id="nvm-install">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash</span>
-              <button class="copy-btn" onclick="copyCmd('nvm-install',this)">העתק</button>
-            </div>
-          </div>
-          <p class="step-note">סגרו את הטרמינל, פתחו אותו מחדש, ואז:</p>
-          <div class="copy-wrap" style="margin-top:8px">
-            <div class="copy-line">
-              <span class="copy-prefix">$</span>
-              <span class="copy-cmd" id="nvm-node">nvm install --lts</span>
-              <button class="copy-btn" onclick="copyCmd('nvm-node',this)">העתק</button>
-            </div>
+    <div class="rule-item reveal">
+      <div class="rule-num">01</div>
+      <div class="rule-title">התקינו Node.js</div>
+      <div class="rule-body">
+        תוכנת בסיס שבלעדיה Claude Code לא יכול לרוץ. כמו Java ל-Minecraft.
+        <div class="platform-label">&#63743; Mac — בטרמינל (⌘+Space → Terminal):</div>
+        <div class="copy-wrap">
+          <div class="copy-line">
+            <span class="copy-prefix">$</span>
+            <span class="copy-cmd" id="nvm-install">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash</span>
+            <button class="copy-btn" onclick="copyCmd('nvm-install',this)">Copy</button>
           </div>
         </div>
-
-        <!-- Windows -->
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--muted2);margin-bottom:10px;letter-spacing:.05em">⊞ WINDOWS — קודם כל: התקינו WSL</div>
-          <div style="background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;color:var(--muted2);line-height:1.7">
-            <strong style="color:var(--red)">⚠ חשוב:</strong> Claude Code לא עובד ב-Command Prompt הרגיל של Windows. צריך <strong style="color:var(--text)">WSL</strong> — טרמינל לינוקס מובנה ב-Windows 10/11.
+        <p class="step-note">סגרו טרמינל, פתחו מחדש, ואז:</p>
+        <div class="copy-wrap">
+          <div class="copy-line">
+            <span class="copy-prefix">$</span>
+            <span class="copy-cmd" id="nvm-node">nvm install --lts</span>
+            <button class="copy-btn" onclick="copyCmd('nvm-node',this)">Copy</button>
           </div>
-          <p style="font-size:13px;color:var(--muted2);margin-bottom:8px"><strong style="color:var(--text)">שלב א׳:</strong> פתחו Command Prompt <strong>כמנהל מערכת</strong> (לחצו ימני → "Run as administrator") והריצו:</p>
-          <div class="copy-wrap">
-            <div class="copy-line">
-              <span class="copy-prefix">></span>
-              <span class="copy-cmd" id="wsl-install">wsl --install</span>
-              <button class="copy-btn" onclick="copyCmd('wsl-install',this)">העתק</button>
-            </div>
-          </div>
-          <p class="step-note" style="margin-top:4px">אחרי שזה נגמר — הפעילו את המחשב מחדש.</p>
-          <p style="font-size:13px;color:var(--muted2);margin-top:14px;margin-bottom:8px"><strong style="color:var(--text)">שלב ב׳:</strong> פתחו <strong>WSL</strong> (לחצו Win, הקלידו "WSL", Enter) והריצו את אותן פקודות כמו Mac:</p>
-          <div class="copy-wrap">
-            <div class="copy-line">
-              <span class="copy-prefix">$</span>
-              <span class="copy-cmd" id="wsl-nvm">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash</span>
-              <button class="copy-btn" onclick="copyCmd('wsl-nvm',this)">העתק</button>
-            </div>
-          </div>
-          <p class="step-note">סגרו WSL, פתחו אותו מחדש, ואז: <code style="color:var(--cyan);font-family:Space Mono,monospace">nvm install --lts</code></p>
         </div>
-
-        <div class="verify-chip" style="margin-top:16px">✓ בדיקה: הקלידו <span style="margin-right:6px">node -v</span> — אם רואים מספר, הצליח</div>
+        <div class="platform-label">⊞ Windows — קודם התקינו WSL:</div>
+        <div class="warn-box"><strong>⚠ חשוב:</strong> Claude Code לא עובד ב-Command Prompt הרגיל. צריך WSL — טרמינל לינוקס מובנה ב-Windows 10/11.</div>
+        <p class="step-note" style="margin-bottom:.5rem">פתחו Command Prompt <strong>כמנהל מערכת</strong> (לחצו ימני → Run as administrator):</p>
+        <div class="copy-wrap">
+          <div class="copy-line">
+            <span class="copy-prefix">></span>
+            <span class="copy-cmd" id="wsl-install">wsl --install</span>
+            <button class="copy-btn" onclick="copyCmd('wsl-install',this)">Copy</button>
+          </div>
+        </div>
+        <p class="step-note">הפעילו מחדש, פתחו WSL, ואז הריצו את אותן פקודות כמו Mac (curl + nvm install).</p>
+        <div class="verify-chip">✓ בדיקה: הקלידו node -v — אם רואים מספר, הצליח</div>
       </div>
     </div>
 
-    <!-- STEP 2 -->
-    <div class="istep reveal rd1">
-      <div class="istep-num"><span class="n">02</span><span class="icon">🔑</span></div>
-      <div class="istep-body">
-        <div class="istep-title">חשבון Claude Pro</div>
-        <div class="istep-subtitle">Claude Code דורש מנוי Pro פעיל. אם יש לכם — מעולה. אם לא — הירשמו.</div>
-        <a class="dl-btn" href="https://claude.ai" target="_blank">→ claude.ai</a>
-        <p class="step-note">לחצו על "Upgrade to Pro". עולה ~$20 לחודש — אפשר לבטל בכל עת.</p>
+    <div class="rule-item reveal rd1">
+      <div class="rule-num">02</div>
+      <div class="rule-title">חשבון Claude Pro</div>
+      <div class="rule-body">
+        Claude Code דורש מנוי Pro פעיל. $20 לחודש, ביטול בכל עת.
+        <div class="copy-wrap" style="margin-top:.75rem">
+          <div class="copy-line">
+            <span class="copy-prefix">→</span>
+            <span class="copy-cmd">claude.ai → Upgrade to Pro</span>
+            <a href="https://claude.ai" target="_blank" class="copy-btn" style="text-decoration:none">פתחו ↗</a>
+          </div>
+        </div>
         <div class="verify-chip">✓ אם אתם יכולים להיכנס ל-claude.ai — אתם בסדר</div>
       </div>
     </div>
 
-    <!-- STEP 3 -->
-    <div class="istep reveal rd2">
-      <div class="istep-num"><span class="n">03</span><span class="icon">⚡</span></div>
-      <div class="istep-body">
-        <div class="istep-title">התקינו Claude Code</div>
-        <div class="istep-subtitle">פקודה אחת בטרמינל — וזהו.</div>
-        <p style="font-size:13px;color:var(--muted2);margin-bottom:10px">איך לפתוח טרמינל: &nbsp;<strong>Mac</strong> — ⌘+Space ← הקלידו "Terminal" ← Enter &nbsp;|&nbsp; <strong style="color:var(--red)">Windows — פתחו WSL</strong> (לא cmd, לא PowerShell)</p>
-        <div class="copy-wrap">
+    <div class="rule-item reveal rd2">
+      <div class="rule-num">03</div>
+      <div class="rule-title">התקינו Claude Code</div>
+      <div class="rule-body">
+        פקודה אחת — וזהו. Mac: Terminal. Windows: WSL (לא cmd, לא PowerShell).
+        <div class="copy-wrap" style="margin-top:.75rem">
           <div class="copy-line">
             <span class="copy-prefix">$</span>
-            <span class="copy-cmd" id="cmd1">npm install -g @anthropic-ai/claude-code</span>
-            <button class="copy-btn" onclick="copyCmd('cmd1',this)">העתק</button>
+            <span class="copy-cmd" id="cc-install">npm install -g @anthropic-ai/claude-code</span>
+            <button class="copy-btn" onclick="copyCmd('cc-install',this)">Copy</button>
           </div>
         </div>
-        <div class="mock-terminal">
-          <div class="mock-term-bar"><span>Terminal / WSL</span></div>
-          <div class="mock-term-body">
-            <div><span class="t-prompt">~$</span> <span class="t-cmd">npm install -g @anthropic-ai/claude-code</span></div>
-            <div class="t-out">added 247 packages in 18s</div>
-            <div class="t-out" style="color:var(--muted)">npm notice New minor version of npm available...</div>
-            <div class="t-out" style="color:var(--muted)">npm notice 1 package is looking for funding</div>
-            <div class="t-success">← זה בסדר גמור. ה-"notices" האלה הם לא שגיאות.</div>
-          </div>
-        </div>
-        <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:12px 16px;margin-top:10px;font-size:13px;color:var(--muted2)">
-          <strong style="color:var(--green)">✓ איך יודעים שהצליח?</strong> — הסמן מהבהב שוב ואין טקסט אדום. הודעות על "npm update" או "funding" הן <strong style="color:var(--text)">לא שגיאות</strong> — התעלמו מהן.
-        </div>
-        <p class="step-note" style="margin-top:8px">זה יכול לקחת 30-60 שניות. חכו שיסיים לפני שממשיכים.</p>
+        <div class="ok-box"><strong>✓ איך יודעים שהצליח?</strong> הסמן מהבהב שוב ואין טקסט אדום. הודעות "npm update" או "funding" הן <strong>לא שגיאות</strong> — התעלמו מהן.</div>
       </div>
     </div>
 
-    <!-- STEP 4 -->
-    <div class="istep reveal">
-      <div class="istep-num"><span class="n">04</span><span class="icon">✅</span></div>
-      <div class="istep-body">
-        <div class="istep-title">בדקו שהכל עובד</div>
-        <div class="istep-subtitle">פקודה קצרה שמאשרת שהתקנה הצליחה.</div>
-        <div class="copy-wrap">
+    <div class="rule-item reveal">
+      <div class="rule-num">04</div>
+      <div class="rule-title">בדקו שהכל עובד</div>
+      <div class="rule-body">
+        פקודה קצרה שמאשרת שהתקנה הצליחה.
+        <div class="copy-wrap" style="margin-top:.75rem">
           <div class="copy-line">
             <span class="copy-prefix">$</span>
-            <span class="copy-cmd" id="cmd2">claude --version</span>
-            <button class="copy-btn" onclick="copyCmd('cmd2',this)">העתק</button>
-          </div>
-        </div>
-        <div class="mock-terminal">
-          <div class="mock-term-bar"><span>Terminal</span></div>
-          <div class="mock-term-body">
-            <div><span class="t-prompt">~$</span> <span class="t-cmd">claude --version</span></div>
-            <div class="t-success">claude-code 1.x.x</div>
-            <div class="t-out" style="margin-top:8px">← אם אתם רואים מספר גרסה — הכל עובד 🎉</div>
+            <span class="copy-cmd" id="cc-ver">claude --version</span>
+            <button class="copy-btn" onclick="copyCmd('cc-ver',this)">Copy</button>
           </div>
         </div>
         <div class="verify-chip">✓ רואים מספר גרסה? — מוכנים לשיעור</div>
-        <div style="background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:12px 16px;margin-top:12px;font-size:13px;color:var(--muted2)">
-          <strong style="color:var(--red)">⊞ Windows — לא קורה כלום?</strong> כנראה שהרצתם את הפקודה ב-cmd במקום ב-WSL. הסיבה: Claude Code הותקן בסביבה הלא נכונה.<br><br>
-          <strong style="color:var(--text)">פתרון:</strong> פתחו WSL (לא cmd), והריצו שוב:<br>
-          <code style="color:var(--cyan);font-family:Space Mono,monospace;font-size:12px">npm install -g @anthropic-ai/claude-code</code><br>
-          ואז: <code style="color:var(--cyan);font-family:Space Mono,monospace;font-size:12px">claude --version</code>
-        </div>
+        <div class="warn-box" style="margin-top:.75rem"><strong>⊞ Windows — לא קורה כלום?</strong> כנראה שהרצתם ב-cmd במקום WSL. פתחו WSL והריצו שוב.</div>
       </div>
     </div>
 
-    <!-- STEP 5 -->
-    <div class="istep reveal rd1">
-      <div class="istep-num"><span class="n">05</span><span class="icon">📁</span></div>
-      <div class="istep-body">
-        <div class="istep-title">הכינו תיקייה</div>
-        <div class="istep-subtitle">תיקייה ריקה על שולחן העבודה. זה יהיה הפרויקט שתבנו בשיעור.</div>
-        <p style="font-size:14px;color:var(--muted2)">Mac: לחצו ימני על שולחן העבודה → New Folder → קראו לה "my-project"<br>Windows: לחצו ימני על Desktop → New → Folder</p>
+    <div class="rule-item reveal rd1">
+      <div class="rule-num">05</div>
+      <div class="rule-title">הכינו תיקייה</div>
+      <div class="rule-body">
+        תיקייה ריקה על שולחן העבודה — זה יהיה הפרויקט שתבנו בשיעור.
+        <p class="step-note" style="margin-top:.6rem">Mac: לחצו ימני על Desktop → New Folder → שם: "my-project"<br/>Windows: לחצו ימני על Desktop → New → Folder</p>
         <p class="step-note">לא צריך שיהיו בה קבצים — נתחיל מאפס ביחד.</p>
       </div>
     </div>
 
   </div>
-</div>
 </section>
-
-<div class="sep"></div>
 
 <!-- ══════════════════════ TIMELINE -->
-<section id="timeline">
-<div class="wrap">
-  <div class="sh reveal"><span class="num">04 —</span><h2>תכנית 60 הדקות</h2><div class="line"></div></div>
+<section class="section" id="timeline">
+  <div class="section-label reveal">04 — תכנית השיעור</div>
+  <h2 class="reveal">60 דקות.</h2>
+  <p class="lead reveal">כל בלוק של זמן יש לו מטרה ברורה. אתם לא צופים — אתם בונים.</p>
 
-  <div class="timeline">
-
-    <div class="tli reveal">
-      <div class="tli-card" style="--ac:#ffaa28">
-        <div class="accent-line"></div>
-        <div class="tli-tag">0 – 10 דקות</div>
-        <div class="tli-name">הפער</div>
-        <div class="tli-desc">השוואה חיה: ChatGPT vs Claude Code. רואים בפועל מה קורה כשאומרים "תכתוב לי אפליקציה" לכל אחד מהם.</div>
-      </div>
-      <div class="tli-side"><div class="tli-dot" style="--ac:#ffaa28;background:#ffaa28;box-shadow:0 0 14px #ffaa28"></div><div class="tli-min">0<br>דק׳</div></div>
-    </div>
-
-    <div class="tli reveal rd1">
-      <div class="tli-card" style="--ac:#fb923c">
-        <div class="accent-line"></div>
-        <div class="tli-tag">10 – 20 דקות</div>
-        <div class="tli-name">מגע ראשון</div>
-        <div class="tli-desc">כולם מריצים <code style="font-family:Space Mono,monospace;color:var(--cyan);font-size:12px">claude</code> בתיקייה שלהם. מריצים <code style="font-family:Space Mono,monospace;color:var(--cyan);font-size:12px">/init</code> ורואים איך Claude "מכיר" את הפרויקט.</div>
-      </div>
-      <div class="tli-side"><div class="tli-dot" style="background:#fb923c;box-shadow:0 0 14px #fb923c"></div><div class="tli-min">10<br>דק׳</div></div>
-    </div>
-
-    <div class="tli reveal rd2">
-      <div class="tli-card" style="--ac:#a78bfa">
-        <div class="accent-line"></div>
-        <div class="tli-tag">20 – 35 דקות</div>
-        <div class="tli-name">Demo חי</div>
-        <div class="tli-desc">Migo מדגים: בונה דבר מאפס בפני כולם. כל אחד רואה את התהליך — Plan → Act → Verify — בפעולה.</div>
-      </div>
-      <div class="tli-side"><div class="tli-dot" style="background:#a78bfa;box-shadow:0 0 14px #a78bfa"></div><div class="tli-min">20<br>דק׳</div></div>
-    </div>
-
-    <div class="tli reveal rd1">
-      <div class="tli-card" style="--ac:#3de0f8">
-        <div class="accent-line"></div>
-        <div class="tli-tag">35 – 55 דקות</div>
-        <div class="tli-name">הפרויקט שלך</div>
-        <div class="tli-desc">כל אחד בוחר פרויקט מהרשימה ומתחיל לבנות. Migo עובר ועוזר. התוצאה — אפליקציה עובדת.</div>
-      </div>
-      <div class="tli-side"><div class="tli-dot" style="background:#3de0f8;box-shadow:0 0 14px #3de0f8"></div><div class="tli-min">35<br>דק׳</div></div>
-    </div>
-
-    <div class="tli reveal rd2">
-      <div class="tli-card" style="--ac:#4ade80">
-        <div class="accent-line"></div>
-        <div class="tli-tag">55 – 60 דקות</div>
-        <div class="tli-name">מה הלאה?</div>
-        <div class="tli-desc">כל אחד מציג מה בנה. דיון: איפה CC שימושי בחיים שלכם? מה אפשר לבנות הבא?</div>
-      </div>
-      <div class="tli-side"><div class="tli-dot" style="background:#4ade80;box-shadow:0 0 14px #4ade80"></div><div class="tli-min">55<br>דק׳</div></div>
-    </div>
-
+  <div class="timeline-stats reveal">
+    <div class="tl-stat"><span class="tl-stat-num">60</span><div class="tl-stat-label">דקות סה״כ</div></div>
+    <div class="tl-stat"><span class="tl-stat-num">1</span><div class="tl-stat-label">פרויקט לכל משתתף</div></div>
+    <div class="tl-stat"><span class="tl-stat-num">5</span><div class="tl-stat-label">בלוקי זמן</div></div>
+    <div class="tl-stat"><span class="tl-stat-num">0</span><div class="tl-stat-label">ניסיון קודם נדרש</div></div>
+    <div class="tl-stat"><span class="tl-stat-num">∞</span><div class="tl-stat-label">אפשרויות</div></div>
   </div>
-</div>
+
+  <div class="tl-list">
+    <div class="tl-item reveal" style="--ac:#f59e0b">
+      <div class="tl-time"><div class="tl-dot"></div><div class="tl-min">0–10<br/>דק׳</div></div>
+      <div class="tl-body"><div class="tl-tag">הפער</div><div class="tl-name">ChatGPT vs Claude Code</div><div class="tl-desc">השוואה חיה: מה קורה כשאומרים "תכתוב לי אפליקציה" לכל אחד מהם. רואים את ההבדל בפועל.</div></div>
+    </div>
+    <div class="tl-item reveal rd1" style="--ac:#a78bfa">
+      <div class="tl-time"><div class="tl-dot"></div><div class="tl-min">10–20<br/>דק׳</div></div>
+      <div class="tl-body"><div class="tl-tag">מגע ראשון</div><div class="tl-name">כולם מריצים claude</div><div class="tl-desc">כולם מריצים <code style="font-family:'Space Mono',monospace;color:var(--cyan)">claude</code> בתיקייה שלהם. מריצים <code style="font-family:'Space Mono',monospace;color:var(--cyan)">/init</code> ורואים איך Claude מכיר את הפרויקט.</div></div>
+    </div>
+    <div class="tl-item reveal rd2" style="--ac:#e879f9">
+      <div class="tl-time"><div class="tl-dot"></div><div class="tl-min">20–35<br/>דק׳</div></div>
+      <div class="tl-body"><div class="tl-tag">Demo חי</div><div class="tl-name">Migo בונה מאפס</div><div class="tl-desc">Migo מדגים בפני כולם: בונה דבר מאפס. כל אחד רואה את התהליך Plan → Act → Verify בפעולה.</div></div>
+    </div>
+    <div class="tl-item reveal" style="--ac:#22d3ee">
+      <div class="tl-time"><div class="tl-dot"></div><div class="tl-min">35–55<br/>דק׳</div></div>
+      <div class="tl-body"><div class="tl-tag">הפרויקט שלך</div><div class="tl-name">כל אחד בונה</div><div class="tl-desc">כל אחד בוחר פרויקט מהרשימה ומתחיל לבנות. Migo עובר ועוזר. התוצאה — אפליקציה עובדת.</div></div>
+    </div>
+    <div class="tl-item reveal rd1" style="--ac:#a3e635">
+      <div class="tl-time"><div class="tl-dot"></div><div class="tl-min">55–60<br/>דק׳</div></div>
+      <div class="tl-body"><div class="tl-tag">מה הלאה?</div><div class="tl-name">כל אחד מציג</div><div class="tl-desc">כל אחד מציג מה בנה. דיון: איפה Claude Code שימושי בחיים שלכם? מה אפשר לבנות הבא?</div></div>
+    </div>
+  </div>
 </section>
 
-<div class="sep"></div>
-
 <!-- ══════════════════════ PROJECTS -->
-<section id="projects">
-<div class="wrap">
-  <div class="sh reveal"><span class="num">05 —</span><h2>בחרו פרויקט</h2><div class="line"></div></div>
-  <p class="proj-intro reveal">כל אחד בוחר פרויקט אחד לבנות בשיעור. לחצו כדי לבחור — תוכלו להציג ל-Migo מה בחרתם.</p>
+<section class="section section-alt2" id="projects">
+  <div class="section-label reveal">05 — בחרו פרויקט</div>
+  <h2 class="reveal">מה תבנו היום?</h2>
+  <p class="lead reveal">כל אחד בוחר פרויקט אחד לבנות בשיעור. לחצו כדי לבחור.</p>
 
   <div class="projects-grid" id="projGrid">
-
-    <div class="proj-card reveal" data-proj="0" style="--pc:#ffaa28;--pc-glow:rgba(255,170,40,.12)" onclick="selectProj(0)">
+    <div class="proj-card reveal" onclick="selectProj(0)">
       <div class="proj-pick">✓ בחרתי</div>
       <span class="proj-emoji">🌐</span>
-      <div class="proj-tag">מומלץ למתחילים</div>
+      <div class="proj-badge">מומלץ למתחילים</div>
       <div class="proj-name">אתר ויזיטקרד אישי</div>
-      <div class="proj-desc">דף אינטרנט עם השם שלכם, תמונה, ומה אתם עושים. כמו כרטיס ביקור דיגיטלי.</div>
+      <div class="proj-desc">דף אינטרנט עם השם שלכם, תמונה, ומה אתם עושים. כרטיס ביקור דיגיטלי.</div>
       <div class="proj-prompt">"בנה לי אתר אישי עם שמי, תפקידי ודרכי ליצור קשר"</div>
     </div>
-
-    <div class="proj-card reveal rd1" data-proj="1" style="--pc:#3de0f8;--pc-glow:rgba(61,224,248,.1)" onclick="selectProj(1)">
+    <div class="proj-card reveal rd1" onclick="selectProj(1)">
       <div class="proj-pick">✓ בחרתי</div>
       <span class="proj-emoji">📋</span>
       <div class="proj-name">רשימת קניות חכמה</div>
       <div class="proj-desc">אפליקציה לניהול רשימות — הוספה, מחיקה, סימון כבוצע. עובדת על הטלפון.</div>
-      <div class="proj-prompt">"צור רשימת קניות עם אפשרות להוסיף פריטים ולסמן כבוצע"</div>
+      <div class="proj-prompt">"צור רשימת קניות עם אפשרות להוסיף ולסמן כבוצע"</div>
     </div>
-
-    <div class="proj-card reveal rd2" data-proj="2" style="--pc:#a78bfa;--pc-glow:rgba(167,139,250,.1)" onclick="selectProj(2)">
+    <div class="proj-card reveal rd2" onclick="selectProj(2)">
       <div class="proj-pick">✓ בחרתי</div>
       <span class="proj-emoji">🍕</span>
       <div class="proj-name">ספר מתכונים משפחתי</div>
       <div class="proj-desc">אתר עם המתכונים שאתם אוהבים — כולל תמונות, מצרכים ואופן הכנה.</div>
       <div class="proj-prompt">"צור ספר מתכונים דיגיטלי עם חיפוש ועיצוב יפה"</div>
     </div>
-
-    <div class="proj-card reveal" data-proj="3" style="--pc:#4ade80;--pc-glow:rgba(74,222,128,.1)" onclick="selectProj(3)">
+    <div class="proj-card reveal" onclick="selectProj(3)">
       <div class="proj-pick">✓ בחרתי</div>
       <span class="proj-emoji">🎂</span>
       <div class="proj-name">הזמנה לאירוע</div>
-      <div class="proj-desc">דף הזמנה מעוצב לחגיגה, יום הולדת, חתונה — עם פרטים ואפשרות לאישור הגעה.</div>
+      <div class="proj-desc">דף הזמנה מעוצב לחגיגה, יום הולדת, חתונה — עם אישור הגעה.</div>
       <div class="proj-prompt">"צור דף הזמנה מעוצב ליום הולדת עם טופס אישור הגעה"</div>
     </div>
-
-    <div class="proj-card reveal rd1" data-proj="4" style="--pc:#f87171;--pc-glow:rgba(248,113,113,.1)" onclick="selectProj(4)">
+    <div class="proj-card reveal rd1" onclick="selectProj(4)">
       <div class="proj-pick">✓ בחרתי</div>
       <span class="proj-emoji">🧠</span>
       <div class="proj-name">חידון אינטרקטיבי</div>
-      <div class="proj-desc">משחק שאלות ותשובות — אתם מגדירים את השאלות והתשובות, CC בונה את המשחק.</div>
+      <div class="proj-desc">משחק שאלות ותשובות — אתם מגדירים את השאלות, CC בונה את המשחק.</div>
       <div class="proj-prompt">"צור חידון על [נושא] עם 5 שאלות וניקוד בסוף"</div>
     </div>
-
-    <div class="proj-card reveal rd2" data-proj="5" style="--pc:#fbbf24;--pc-glow:rgba(251,191,36,.1)" onclick="selectProj(5)">
+    <div class="proj-card reveal rd2" onclick="selectProj(5)">
       <div class="proj-pick">✓ בחרתי</div>
       <span class="proj-emoji">💰</span>
-      <div class="proj-name">מחשבון פשוט</div>
+      <div class="proj-name">מחשבון חכם</div>
       <div class="proj-desc">מחשבון לכל דבר — שכירות, הלוואה, חלוקת הוצאות. אתם מגדירים מה לחשב.</div>
       <div class="proj-prompt">"בנה מחשבון לחלוקת הוצאות בין חברים עם עיצוב נקי"</div>
     </div>
-
   </div>
-</div>
 </section>
 
-<div class="sep"></div>
+<!-- ══════════════════════ MARQUEE 2 -->
+<div class="marquee-wrap">
+  <div class="marquee-track" style="animation-direction:reverse">
+    <div class="marquee-item">Plan → Act → Verify<span>·</span>אתם בשליטה<span>·</span>Esc Esc לעצור<span>·</span>CLAUDE.md לזכור<span>·</span>/init להתחיל<span>·</span>Plan → Act → Verify<span>·</span>אתם בשליטה<span>·</span>Esc Esc לעצור<span>·</span>CLAUDE.md לזכור<span>·</span>/init להתחיל</div>
+    <div class="marquee-item">Plan → Act → Verify<span>·</span>אתם בשליטה<span>·</span>Esc Esc לעצור<span>·</span>CLAUDE.md לזכור<span>·</span>/init להתחיל<span>·</span>Plan → Act → Verify<span>·</span>אתם בשליטה<span>·</span>Esc Esc לעצור<span>·</span>CLAUDE.md לזכור<span>·</span>/init להתחיל</div>
+  </div>
+</div>
 
 <!-- ══════════════════════ CONCEPTS -->
-<section id="concepts">
-<div class="wrap">
-  <div class="sh reveal"><span class="num">06 —</span><h2>מושגי בסיס</h2><div class="line"></div></div>
+<section class="section" id="concepts">
+  <div class="section-label reveal">06 — מושגי בסיס</div>
+  <h2 class="reveal">מה צריך לדעת.</h2>
+  <p class="lead reveal">אלה המושגים שיחזרו כל הזמן. לא צריך לשנן — רק להכיר.</p>
 
   <div class="concepts-grid">
     <div class="con-card reveal">
@@ -628,76 +526,91 @@ footer .logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber
     <div class="con-card reveal rd2">
       <div class="con-cmd">CLAUDE.md</div>
       <div class="con-title">הזיכרון הקבוע</div>
-      <div class="con-desc">קובץ שאתם כותבים פעם אחת — Claude קורא אותו בכל שיחה. כתבו בו את הכללים, הסגנון, ומה חשוב לפרויקט.</div>
+      <div class="con-desc">קובץ שאתם כותבים פעם אחת — Claude קורא אותו בכל שיחה. הכללים, הסגנון, מה חשוב.</div>
     </div>
-    <div class="con-card reveal">
+    <div class="con-card reveal rd3">
       <div class="con-cmd">Memory</div>
       <div class="con-title">Claude לומד ומאחסן</div>
-      <div class="con-desc">מעבר ל-CLAUDE.md — Claude שומר הערות לעצמו בין שיחות. הוא זוכר תיקונים שעשיתם, העדפות סגנון, ונתיבים חשובים. אוטומטי לחלוטין.</div>
-    </div>
-    <div class="con-card reveal rd1">
-      <div class="con-cmd">/skill-name</div>
-      <div class="con-title">פקודות מותאמות אישית</div>
-      <div class="con-desc">אפשר ללמד את Claude "שגרות" קבועות — /commit, /review, /deploy. כותבים קובץ מרקדאון אחד ו-Claude יודע בדיוק מה לעשות בכל פעם שמפעילים אותו.</div>
-    </div>
-    <div class="con-card reveal rd2">
-      <div class="con-cmd">@file / שאלות</div>
-      <div class="con-title">ניתוח קוד ומסמכים</div>
-      <div class="con-desc">שואלים שאלות על קבצים קיימים: "מה עושה הפונקציה הזו?", "מאיפה מגיע הבאג הזה?", "הסבר לי את הפרויקט". Claude קורא, מנתח, ומסביר.</div>
+      <div class="con-desc">מעבר ל-CLAUDE.md — Claude שומר הערות לעצמו בין שיחות. זוכר תיקונים, העדפות, נתיבים.</div>
     </div>
     <div class="con-card reveal">
-      <div class="con-cmd">Esc Esc</div>
-      <div class="con-title">עצור הכל</div>
-      <div class="con-desc">לחיצה כפולה על Escape עוצרת את Claude ומחזירה הכל למצב הקודם. כמו Ctrl+Z סופר.</div>
+      <div class="con-cmd">/skill-name</div>
+      <div class="con-title">פקודות מותאמות</div>
+      <div class="con-desc">לומדים Claude שגרות קבועות: /commit, /review, /deploy. קובץ מרקדאון אחד = פקודה חדשה.</div>
     </div>
     <div class="con-card reveal rd1">
+      <div class="con-cmd">@file / שאלות</div>
+      <div class="con-title">ניתוח קוד ומסמכים</div>
+      <div class="con-desc">"מה עושה הפונקציה הזו?" — Claude קורא, מנתח, מסביר. מצביע על באגים, מציע שיפורים.</div>
+    </div>
+    <div class="con-card reveal rd2">
+      <div class="con-cmd">Esc Esc</div>
+      <div class="con-title">עצור הכל</div>
+      <div class="con-desc">לחיצה כפולה על Escape עוצרת את Claude מיד. אתם תמיד בשליטה.</div>
+    </div>
+    <div class="con-card reveal rd3">
       <div class="con-cmd">Permissions</div>
       <div class="con-title">Claude שואל לפני</div>
-      <div class="con-desc">לפני כל שינוי בקובץ Claude מבקש אישור. אתם תמיד בשליטה.</div>
+      <div class="con-desc">לפני כל שינוי בקובץ Claude מבקש אישור. אתם רואים כל דבר לפני שזה קורה.</div>
     </div>
   </div>
-</div>
 </section>
 
 <!-- ══════════════════════ FOOTER -->
 <footer>
-  <div class="wrap">
-    <div class="logo">CLAUDE CODE CRASH COURSE</div>
-    <p>בניית Migo &nbsp;·&nbsp; לשלי, אביגיל ומוזמנים נוספים &nbsp;·&nbsp; 2026</p>
+  <div>
+    <div class="footer-logo">BSIDESTLV · CLAUDE CODE CRASH COURSE · 2026</div>
+    <div class="footer-tagline">"תבנו משהו. עכשיו."</div>
+  </div>
+  <div class="footer-right">
+    עם Migo Kedem<br/>
+    Alice in AI Land<br/>
+    BSidesTLV 2026
   </div>
 </footer>
 
 <script>
-// scroll reveal
-const obs = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})
+// progress bar
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  const pct=(h.scrollTop||document.body.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+  document.getElementById('progress').style.width=pct+'%';
+});
+
+// reveal
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
 },{threshold:.07,rootMargin:'0px 0px -30px 0px'});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
-// copy buttons
+// active nav
+const sections=document.querySelectorAll('section[id]');
+const links=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-120)cur=s.id});
+  links.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+
+// copy
 function copyCmd(id,btn){
-  const txt=document.getElementById(id).textContent;
+  const el=document.getElementById(id);
+  const txt=el?el.textContent:id;
   navigator.clipboard.writeText(txt).then(()=>{
-    btn.textContent='✓ הועתק';btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='העתק';btn.classList.remove('copied')},2000);
+    const orig=btn.textContent;
+    btn.textContent='✓ Copied';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent=orig;btn.classList.remove('copied')},2000);
   });
 }
 
 // project picker
-const PROJ_KEY='cc_proj_v1';
-let selected=parseInt(localStorage.getItem(PROJ_KEY)??'-1');
-
+let selected=parseInt(localStorage.getItem('cc_proj_v2')??'-1');
 function selectProj(id){
   selected=selected===id?-1:id;
-  localStorage.setItem(PROJ_KEY,selected);
-  renderProj();
+  localStorage.setItem('cc_proj_v2',selected);
+  document.querySelectorAll('.proj-card').forEach((el,i)=>el.classList.toggle('selected',i===selected));
 }
-function renderProj(){
-  document.querySelectorAll('.proj-card').forEach((el,i)=>{
-    el.classList.toggle('selected',i===selected);
-  });
-}
-renderProj();
+document.querySelectorAll('.proj-card').forEach((el,i)=>el.classList.toggle('selected',i===selected));
 </script>
 </body>
 </html>
